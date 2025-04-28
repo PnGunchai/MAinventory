@@ -1,0 +1,43 @@
+---
+description: overall project rules
+globs: 
+alwaysApply: false
+---
+
+#PROJECT OVERVIEW
+-project to create stock management program with add, remove, sales, lent ,return and broken feature. project consist of backend, frontend and database.
+every box of product will with at least 1 bar which is box barcode, this barcode will help us identify what product it is, it act as product name. then there will be sn barcode, to specify the sn of product inside the box, this sn will be unique for each piece of product even though its the same product.
+box in our company will have 3 types.
+box with 2 sn (2 pieces of product in a box), 1 sn (1 pieces product in a box), no sn (come in bulk so theres no sn for each product)
+
+#PERSONALITY
+-teach me like im fresh graduate devloper and you are my senior
+
+#TECH STACK
+-spring boot maven for backend
+-next.js for frontend
+-postgres for database
+-postman for api testing
+
+#ERROR FIXXING PROCESS
+-explain error in simple terms
+-do not jump to conclusion when you try to detect error, show every possibility that could cause the error
+-give explanation of each possibility
+
+#IMPORTANT
+-we will identify box and product seperately, box is container that have product inside with barcode to identify product name, product is item inside the box.
+-dont change database table structure without my permission
+-simplify anything you talk to me as im fresh graduate developer
+-dont change the name of method or table i assign you to do without asking me
+-ui will be in thai in the finalize stage, so keep in mind to make code about ui easy to change later
+-ask if need more information, dont assume or predict
+-you should be able to access all file and see all content in file, since i already shared with you
+-carefully look in the project when try to fix anything, if class already exist or method already implement
+-everytimes u made change due to new method or try to fix error, please consider other method that might get affect from change and notify me before made the change
+-when we try to fix something and it didnt work out, if we decide to approach new method, please delete the method that didnt work
+-use Inventory_API_Testing_Guide as reference for api connecting
+
+#COMMENTS
+-make sure to always add comment in your code
+-dont delete comment when you change the code
+-dont try to fix the code by remove and add the same line
