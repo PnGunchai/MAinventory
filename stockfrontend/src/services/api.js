@@ -1,5 +1,5 @@
 // Use environment variable for API URL with fallback
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mainventory.onrender.com/api';
 
 // Generic API call function with error handling
 async function apiCall(endpoint, options = {}) {
