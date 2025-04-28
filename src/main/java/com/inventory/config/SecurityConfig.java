@@ -38,6 +38,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
             "https://mainventory.vercel.app",
+            "https://mainventory-git-main-pngunchais-projects.vercel.app",
+            "https://mainventory-nizbsmm9-pngunchais-projects.vercel.app",
             "http://localhost:3000"
         ));
         configuration.setAllowedMethods(Arrays.asList(
