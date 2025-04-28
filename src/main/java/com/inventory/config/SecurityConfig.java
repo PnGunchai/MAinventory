@@ -40,12 +40,14 @@ public class SecurityConfig {
             "https://mainventory.vercel.app",
             "https://mainventory-git-main-pngunchais-projects.vercel.app",
             "https://mainventory-nizbsmm9-pngunchais-projects.vercel.app",
+            "https://mainventory.onrender.com",
             "http://localhost:3000"
         ));
         configuration.setAllowedMethods(Arrays.asList(
             "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
         ));
         configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setExposedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
