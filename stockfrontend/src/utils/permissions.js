@@ -1,6 +1,15 @@
 // Define role-based permissions
 const ROLE_PERMISSIONS = {
-    ADMIN: ['view_all', 'edit_all', 'delete_all'],
+    ADMIN: [
+        'view_all',
+        'edit_all',
+        'delete_all',
+        'canAddStock',
+        'canRemoveStock',
+        'canCreateOrder',
+        'canEditOrder',
+        'canDeleteOrder'
+    ],
     USER: ['view_all', 'edit_all'],
     SALES: ['view_stock', 'view_orders']
 };
