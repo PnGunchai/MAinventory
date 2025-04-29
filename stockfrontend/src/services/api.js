@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 
 // Use environment variable for API URL with fallback
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mainventory.onrender.com/api';
 
 // Generic API call function with error handling
 async function apiCall(endpoint, options = {}) {
@@ -19,6 +19,7 @@ async function apiCall(endpoint, options = {}) {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                'Origin': window.location.origin,
                 ...(token && { 'Authorization': `Bearer ${token}` }),
                 ...options.headers,
             },
@@ -26,8 +27,23 @@ async function apiCall(endpoint, options = {}) {
             mode: 'cors', // Enable CORS mode
         });
 
-        console.log('Response status:', response.status); // Debug log
-        console.log('Response headers:', Object.fromEntries(response.headers.entries())); // Debug log
+        // Log response details for debugging
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+        if (!response.ok) {
+            // Handle HTTP errors
+            const error = new Error('API call failed');
+            error.status = response.status;
+            error.statusText = response.statusText;
+            try {
+                const errorData = await response.text();
+                error.data = errorData ? JSON.parse(errorData) : null;
+            } catch (e) {
+                error.data = null;
+            }
+            throw error;
+        }
 
         // For DELETE operations that return no content
         if (response.status === 204) {
@@ -39,27 +55,20 @@ async function apiCall(endpoint, options = {}) {
         console.log('Response text:', text); // Debug log
         
         const data = text ? JSON.parse(text) : null;
-        console.log('Parsed data:', data); // Debug log
-        
-        if (!response.ok) {
-            console.error('API Error:', {
-                status: response.status,
-                statusText: response.statusText,
-                data: data
-            }); // Debug log
-            throw new Error(data?.message || `HTTP error! status: ${response.status}`);
-        }
+        console.log('Parsed data:', data);
 
         return data;
     } catch (error) {
-        console.error('API Call Error:', {
-            name: error.name,
-            message: error.message,
-            stack: error.stack
-        }); // Debug log
-        throw error;
+        console.error('API call error:', error);
+        throw {
+            status: error.status,
+            data: error.data,
+            message: error.message || 'Network error occurred'
+        };
     }
 }
+
+export default apiCall;
 
 // Product Catalog API functions
 export const productApi = {
