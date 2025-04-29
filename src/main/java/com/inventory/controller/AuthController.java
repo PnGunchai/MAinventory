@@ -16,7 +16,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000", "https://mainventory.vercel.app", "https://*.vercel.app"}, allowCredentials = "true")
 public class AuthController {
 
     private final UserService userService;
