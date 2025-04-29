@@ -214,14 +214,28 @@ public class DataController {
     }
 
     /**
-     * Get all invoices with pagination
+     * Get all invoices with pagination and search
      */
     @GetMapping("/invoices")
     public ResponseEntity<Page<Invoice>> getAllInvoices(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "timestamp") String sortBy) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
-        return ResponseEntity.ok(invoiceRepository.findAll(pageable));
+            @RequestParam(defaultValue = "timestamp") String sort,
+            @RequestParam(defaultValue = "desc") String direction,
+            @RequestParam(required = false) String search) {
+        
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
+        
+        Page<Invoice> invoices;
+        if (search != null && !search.trim().isEmpty()) {
+            // Search in invoice, employeeId, or shopName
+            invoices = invoiceRepository.findByInvoiceContainingIgnoreCaseOrEmployeeIdContainingIgnoreCaseOrShopNameContainingIgnoreCase(
+                search, search, search, pageable);
+        } else {
+            invoices = invoiceRepository.findAll(pageable);
+        }
+        
+        return ResponseEntity.ok(invoices);
     }
 } 

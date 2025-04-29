@@ -8,8 +8,7 @@ export default function Catalog() {
   const [formData, setFormData] = useState({
     boxBarcode: '',
     productName: '',
-    numberSn: 0,
-    description: ''
+    numberSn: 0
   });
 
   // State for products list
@@ -145,8 +144,7 @@ export default function Catalog() {
       setFormData({
         boxBarcode: '',
         productName: '',
-        numberSn: 0,
-        description: ''
+        numberSn: 0
       });
       // Reload products
       await loadProducts();
@@ -258,17 +256,6 @@ export default function Catalog() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-900">Description</label>
-              <input
-                type="text"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-lg border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900"
-                placeholder="Enter product description"
-              />
-            </div>
-            <div>
               <button
                 type="submit"
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
@@ -363,11 +350,6 @@ export default function Catalog() {
                 <th 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider"
                 >
-                  Description
-                </th>
-                <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider"
-                >
                   Actions
                 </th>
               </tr>
@@ -405,9 +387,6 @@ export default function Catalog() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                       {product.numberSn}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">
-                      {product.description || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button

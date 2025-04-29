@@ -155,4 +155,17 @@ public class InStockService {
     public long countInStockByBoxBarcodeAndProductName(String boxBarcode, String productName) {
         return inStockRepository.countByBoxBarcodeAndProductName(boxBarcode, productName);
     }
+
+    /**
+     * Check if a product is in stock and get its details
+     * @return The InStock object if found, null if not in stock
+     */
+    public InStock getInStockDetails(String productBarcode) {
+        if (productBarcode == null || productBarcode.isEmpty()) {
+            return null;
+        }
+        
+        Optional<InStock> inStock = inStockRepository.findByProductBarcode(productBarcode);
+        return inStock.orElse(null);
+    }
 } 

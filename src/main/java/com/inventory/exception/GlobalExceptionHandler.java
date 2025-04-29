@@ -110,16 +110,14 @@ public class GlobalExceptionHandler {
         // Log the full stack trace for debugging
         logger.error("Unhandled exception occurred", ex);
         
-        // Don't expose internal error details to client
+        // Include more detailed error information in development/debugging
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         body.put("error", "Internal Server Error");
-        
-        // Only include a generic message for security
-        body.put("message", "An unexpected error occurred. Please try again later.");
-        
-        // Include a request ID for tracking
+        body.put("exception", ex.getClass().getName());
+        body.put("message", ex.getMessage());
+        body.put("stackTrace", ex.getStackTrace());
         body.put("requestId", UUID.randomUUID().toString());
         
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -195,7 +193,10 @@ public class GlobalExceptionHandler {
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         body.put("error", "Database Error");
-        body.put("message", "A database error occurred. Please try again later.");
+        body.put("sqlState", ex.getSQLState());
+        body.put("errorCode", ex.getErrorCode());
+        body.put("message", ex.getMessage());
+        body.put("stackTrace", ex.getStackTrace());
         body.put("requestId", UUID.randomUUID().toString());
         
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);

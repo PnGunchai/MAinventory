@@ -264,7 +264,7 @@ export default function Records() {
                       {record.shopName || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {record.quantity || 1}
+                      {record.quantity ?? 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                       {getStatusDisplay(record)}

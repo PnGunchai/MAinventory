@@ -4,6 +4,8 @@ import com.inventory.model.LentId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -46,4 +48,23 @@ public interface LentIdRepository extends JpaRepository<LentId, String> {
      * Find lent IDs by timestamp between start and end time
      */
     List<LentId> findByTimestampBetween(LocalDateTime startTime, LocalDateTime endTime);
+
+    /**
+     * Search lent IDs by terms in lentId, employeeId, or shopName
+     */
+    @Query("SELECT l FROM LentId l WHERE " +
+           "LOWER(l.lentId) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(l.employeeId) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(l.shopName) LIKE LOWER(CONCAT('%', :search, '%'))")
+    Page<LentId> findBySearchTerms(@Param("search") String search, Pageable pageable);
+
+    /**
+     * Search lent IDs by terms in lentId, employeeId, or shopName and status
+     */
+    @Query("SELECT l FROM LentId l WHERE " +
+           "(LOWER(l.lentId) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(l.employeeId) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(l.shopName) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+           "l.status = :status")
+    Page<LentId> findByStatusAndSearchTerms(@Param("status") String status, @Param("search") String search, Pageable pageable);
 } 

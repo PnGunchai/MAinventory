@@ -40,16 +40,26 @@ public class LentIdController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "timestamp") String sort,
-            @RequestParam(defaultValue = "desc") String direction) {
+            @RequestParam(defaultValue = "desc") String direction,
+            @RequestParam(required = false) String search) {
         
         Sort.Direction sortDirection = direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
         
-        if (status != null && !status.isEmpty()) {
-            return ResponseEntity.ok(lentIdRepository.findByStatus(status, pageable));
+        Page<LentId> result;
+        if (search != null && !search.trim().isEmpty()) {
+            if (status != null && !status.isEmpty()) {
+                result = lentIdRepository.findByStatusAndSearchTerms(status, search, pageable);
+            } else {
+                result = lentIdRepository.findBySearchTerms(search, pageable);
+            }
+        } else if (status != null && !status.isEmpty()) {
+            result = lentIdRepository.findByStatus(status, pageable);
+        } else {
+            result = lentIdRepository.findAll(pageable);
         }
         
-        return ResponseEntity.ok(lentIdRepository.findAll(pageable));
+        return ResponseEntity.ok(result);
     }
     
     /**

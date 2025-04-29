@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { orderApi } from '@/services/api';
+import { useAuthStore } from '@/store/authStore';
 import NewOrderModal from './NewOrderModal';
 import NewBrokenOrderModal from './NewBrokenOrderModal';
 import EditOrderModal from '../../components/EditOrderModal';
@@ -20,6 +21,7 @@ function debounce(func, wait) {
 }
 
 export default function Orders() {
+  const hasPermission = useAuthStore(state => state.hasPermission);
   const [activeTab, setActiveTab] = useState('sales');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -129,10 +131,10 @@ export default function Orders() {
   const handleProcessClick = (order) => {
     setSelectedOrder({
       ...order,
-      orderId: order.orderId, // For sales orders, this is invoice number; for lent orders, this is lentId
+      orderId: order.lentId,
       employeeId: order.employeeId,
       shopName: order.shopName,
-      status: order.status // Only present for lent orders
+      status: order.status
     });
     setShowProcessModal(true);
     setProcessingError(null);
@@ -288,27 +290,18 @@ export default function Orders() {
       setError(null);
       
       const response = activeTab === 'sales' 
-        ? await orderApi.getSalesOrders(currentPage, 10, sortField, sortDirection)
-        : await orderApi.getLentOrders(currentPage, 10, sortField, sortDirection);
+        ? await orderApi.getSalesOrders(currentPage, 10, sortField, sortDirection, debouncedSearchTerm)
+        : await orderApi.getLentOrders(currentPage, 10, sortField, sortDirection, debouncedSearchTerm);
       
-      // Client-side filtering
-      let filteredContent = response.content;
-      if (debouncedSearchTerm) {
-        const searchLower = debouncedSearchTerm.toLowerCase();
-        filteredContent = response.content.filter(order => 
-          order.orderId?.toString().toLowerCase().includes(searchLower) ||
-          order.employeeId?.toString().toLowerCase().includes(searchLower) ||
-          order.shopName?.toLowerCase().includes(searchLower)
-        );
-      }
-      
-      setOrders(filteredContent || []); // Set filtered results
-      setTotalPages(Math.ceil(filteredContent.length / 10)); // Update total pages based on filtered results
-      setTotalElements(filteredContent.length); // Update total elements based on filtered results
+      setOrders(response.content || []); 
+      setTotalPages(response.totalPages); 
+      setTotalElements(response.totalElements);
     } catch (err) {
       console.error('Error fetching orders:', err);
       setError(err.message || 'Failed to fetch orders');
-      setOrders([]); // Set empty array on error
+      setOrders([]);
+      setTotalPages(0);
+      setTotalElements(0);
     } finally {
       setLoading(false);
     }
@@ -360,7 +353,7 @@ export default function Orders() {
     try {
       let items;
       if (activeTab === 'lent') {
-        items = await orderApi.getLentOrderItems(order.orderId);
+        items = await orderApi.getLentOrderItems(order.lentId);
       } else {
         items = await orderApi.getSalesOrderItems(order.orderId);
       }
@@ -411,12 +404,14 @@ export default function Orders() {
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-black">Orders</h1>
-        <button 
-          onClick={() => setShowNewOrderModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Create Order
-        </button>
+        {hasPermission('canCreateOrder') && (
+          <button 
+            onClick={() => setShowNewOrderModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Create Order
+          </button>
+        )}
       </div>
 
       {/* New Order Modal */}
@@ -572,9 +567,9 @@ export default function Orders() {
                     </td>
                   </tr>
                 ) : orders.map((order) => (
-                    <tr key={order.orderId} className="hover:bg-gray-50">
+                    <tr key={activeTab === 'sales' ? order.orderId : order.lentId} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {order.orderId || 'N/A'}
+                        {activeTab === 'sales' ? (order.orderId || 'N/A') : (order.lentId || 'N/A')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                         {order.timestamp ? new Date(order.timestamp).toLocaleString('th-TH', {
@@ -611,7 +606,7 @@ export default function Orders() {
                           >
                             View
                           </button>
-                          {activeTab === 'sales' && (
+                          {hasPermission('canCreateOrder') && activeTab === 'sales' && (
                             <button
                               onClick={() => handleEditClick(order)}
                               className="text-green-600 hover:text-green-900"
@@ -619,7 +614,7 @@ export default function Orders() {
                               Edit
                             </button>
                           )}
-                          {activeTab === 'lent' && order.status === 'active' && (
+                          {hasPermission('canCreateOrder') && activeTab === 'lent' && order.status === 'active' && (
                             <button
                               onClick={() => handleProcessClick(order)}
                               className="text-yellow-600 hover:text-yellow-900"
@@ -697,7 +692,7 @@ export default function Orders() {
 
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-300 mb-4">
                 <h4 className="font-medium mb-2 text-gray-900">Order Details</h4>
-                <p className="text-gray-900">Order ID: {selectedOrder.orderId}</p>
+                <p className="text-gray-900">Lent ID: {selectedOrder.orderId}</p>
                 <p className="text-gray-900">Shop: {selectedOrder.shopName}</p>
                 <p className="text-gray-900">Employee: {selectedOrder.employeeId}</p>
                 <p className="text-gray-900">Active Items: {processingItems.filter(item => item.status === 'lent').length}</p>
@@ -739,7 +734,7 @@ export default function Orders() {
                         Product
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Box Barcode
+                        Box Number
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Quantity
@@ -753,14 +748,17 @@ export default function Orders() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {processingItems.map((item, index) => (
+                    {processingItems
+                      .filter(item => item.status !== 'processed') // Filter out processed items
+                      .map((item, index) => (
                       <tr key={index} className={item.status !== 'lent' ? 'bg-gray-50' : ''}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {item.productName}
-                          {item.productBarcode && <div className="text-xs text-gray-500">{item.productBarcode}</div>}
+                          <div className="text-xs text-gray-500">{item.boxBarcode}</div>
+                          {item.productBarcode && <div className="text-xs font-bold text-blue-600">{item.productBarcode}</div>}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {item.boxBarcode}
+                          {item.boxNumber}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {!item.productBarcode ? item.quantity : 1}
@@ -895,6 +893,19 @@ export default function Orders() {
                     <p className="text-gray-700 whitespace-pre-wrap">{viewOrder.note}</p>
                   </div>
                 )}
+                {activeTab === 'sales' && viewOrder.editCount > 0 && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex items-center mb-2">
+                      <p className="font-medium text-gray-900">Edit History</p>
+                      <span className="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                        {viewOrder.editCount} {viewOrder.editCount === 1 ? 'edit' : 'edits'}
+                      </span>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded-md max-h-40 overflow-y-auto">
+                      <pre className="text-sm text-gray-700 whitespace-pre-wrap">{viewOrder.editHistory}</pre>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm">
@@ -923,7 +934,9 @@ export default function Orders() {
                         </td>
                       </tr>
                     ) : (
-                      viewOrderItems.map((item) => (
+                      viewOrderItems
+                        .filter(item => item.status !== 'processed')
+                        .map((item) => (
                         <tr key={`${item.salesId || item.lendId}-${item.productBarcode || item.boxBarcode}`} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                             {item.productName}
@@ -932,7 +945,7 @@ export default function Orders() {
                             {item.quantity > 1 ? "-" : item.productBarcode}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                            {item.quantity || 1}
+                            {item.quantity ?? 1}
                           </td>
                           {activeTab === 'lent' && (
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">

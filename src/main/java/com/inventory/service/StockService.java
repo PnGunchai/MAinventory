@@ -717,6 +717,7 @@ public class StockService {
         boolean isSerializedProduct = product.getNumberSn() > 0;
         Integer boxNumber = stock.getBoxNumber();
         boolean isFirstOfPair = true; // Default to true
+        Integer originalBoxNumber = null; // Add this declaration
         
         if (productBarcode != null) {
             // For serialized products, check by product barcode
@@ -728,22 +729,27 @@ public class StockService {
                 isLentItem = true;
                 isMoveFromLentToSales = true; // Set the specific flag
                 String foundLentOrderId = lentItem.get().getOrderId();
+
+                // Get the box number from the original lent record
+                Integer lentBoxNumber = lentItem.get().getBoxNumber();
                 
-                // Create log entry for moving from lent to sales (system note)
-                Logs lentLog = logsService.createLog(
+                // Create log entry for moving from lent to sales with original box number
+                Logs moveFromLentLog = logsService.createLog(
                     boxBarcode,
                     productName,
                     productBarcode, // Include product barcode for serialized products
                     "moved_from_lent_to_sales",
                     "Moved from lent order: " + foundLentOrderId,
-                    boxNumber,
+                    lentBoxNumber, // Use box number from lent record
                     quantity
                 );
-                lentLog.setOrderId(orderId); // Use the new sales order ID
-                logsService.save(lentLog);
+                moveFromLentLog.setOrderId(orderId); // Use the new sales order ID
+                logsService.save(moveFromLentLog);
+
                 // Get or create invoice
                 Invoice invoice = getOrCreateInvoice(orderId, employeeId, shopName);
-                // Create sales record for the lent item (user note)
+
+                // Create sales record with original box number
                 Sales sale = new Sales();
                 sale.setBoxBarcode(boxBarcode);
                 sale.setProductName(productName);
@@ -752,7 +758,7 @@ public class StockService {
                 sale.setShopName(shopName);
                 sale.setOrderId(orderId);
                 sale.setNote(note + " (from lent order: " + foundLentOrderId + ")"); // Only user note
-                sale.setBoxNumber(boxNumber);
+                sale.setBoxNumber(lentBoxNumber); // Use box number from lent record
                 
                 // Log the isDirectSales value being set for serialized products
                 logger.info("StockService - Setting isDirectSales={} for serialized lent-to-sales conversion", isDirectSales);
@@ -793,7 +799,7 @@ public class StockService {
                 String foundLentOrderId = lentItem.get().getOrderId();
                 
                 // Create log entry for moving from lent to sales (system note)
-                Logs lentLog = logsService.createLog(
+                Logs moveFromLentLog = logsService.createLog(
                     boxBarcode,
                     productName,
                     null, // For non-serialized products, this should be null
@@ -802,10 +808,12 @@ public class StockService {
                     null, // For non-serialized products, boxNumber should be null
                     quantity
                 );
-                lentLog.setOrderId(orderId); // Use the new sales order ID
-                logsService.save(lentLog);
+                moveFromLentLog.setOrderId(orderId); // Use the new sales order ID
+                logsService.save(moveFromLentLog);
+                
                 // Get or create invoice
                 Invoice invoice = getOrCreateInvoice(orderId, employeeId, shopName);
+                
                 // Create sales record for the non-serialized lent item (user note)
                 Sales sale = new Sales();
                 sale.setBoxBarcode(boxBarcode);
@@ -815,7 +823,7 @@ public class StockService {
                 sale.setShopName(shopName);
                 sale.setOrderId(orderId);
                 sale.setNote(note + " (from lent order: " + foundLentOrderId + ")"); // Updated note format
-                sale.setBoxNumber(boxNumber);
+                sale.setBoxNumber(null); // Always null for non-serialized products
                 
                 // Log the isDirectSales value being set
                 logger.info("StockService - Setting isDirectSales={} for non-serialized lent-to-sales conversion", isDirectSales);
@@ -845,15 +853,19 @@ public class StockService {
                     // If not a lent item being moved to sales, handle regular sales
                     if (!isLentItem) {
                         if (isSerializedProduct) {
-                            // Check if the product is in stock
-                            if (!inStockService.isInStock(productBarcode)) {
+                            // Get the in-stock details before removing from stock
+                            InStock inStockDetails = inStockService.getInStockDetails(productBarcode);
+                            if (inStockDetails == null) {
                                 throw new InvalidInputException("Product barcode " + productBarcode + " is not in stock");
                             }
+                            
+                            // Use the box number from in_stock
+                            originalBoxNumber = inStockDetails.getBoxNumber();
                             
                             // Remove from in_stock table
                             inStockService.removeFromStock(productBarcode);
                             
-                            // Create sales record
+                            // Create sales record with original box number
                             Sales sale = new Sales();
                             sale.setBoxBarcode(boxBarcode);
                             sale.setProductName(productName);
@@ -862,7 +874,7 @@ public class StockService {
                             sale.setShopName(shopName);
                             sale.setOrderId(orderId);
                             sale.setNote(note); // Only user note
-                            sale.setBoxNumber(boxNumber);
+                            sale.setBoxNumber(originalBoxNumber); // Use original box number from in_stock
                             sale.setIsDirectSales(true); // Set to true for direct sales
                             sale.setQuantity(quantity);
                             
@@ -873,14 +885,14 @@ public class StockService {
                             sale.setTimestamp(LocalDateTime.now()); // Set the timestamp
                             salesService.save(sale);
                             
-                            // Create log entry for sales
+                            // Create log entry for sales with original box number
                             Logs salesLog = logsService.createLog(
                                 boxBarcode,
                                 productName,
                                 productBarcode,
                                 "sold",
                                 "Sold item",
-                                boxNumber,
+                                originalBoxNumber,
                                 quantity
                             );
                             salesLog.setOrderId(orderId);
@@ -930,6 +942,9 @@ public class StockService {
                             currentStock.setLastUpdated(LocalDateTime.now());
                             currentStockRepository.save(currentStock);
                         }
+
+                        // Sync current stock with in_stock to ensure accurate quantity
+                        syncCurrentStockWithInStock(boxBarcode, productName);
                     }
                 }
                 break;
@@ -937,10 +952,14 @@ public class StockService {
             case "lent":
                 // For serialized products, check in-stock status
                 if (isSerializedProduct) {
-                    // Check if the product is in stock
-                    if (!inStockService.isInStock(productBarcode)) {
+                    // Get the in-stock details before removing from stock
+                    InStock inStockDetails = inStockService.getInStockDetails(productBarcode);
+                    if (inStockDetails == null) {
                         throw new InvalidInputException("Product barcode " + productBarcode + " is not in stock");
                     }
+                    
+                    // Use the box number from in_stock
+                    originalBoxNumber = inStockDetails.getBoxNumber();
                     
                     // Remove from in_stock table
                     inStockService.removeFromStock(productBarcode);
@@ -948,7 +967,7 @@ public class StockService {
                     // If this is a paired product (SN=2) and not splitting pairs, handle the paired item
                     if (product.getNumberSn() == 2 && !splitPair) {
                         // Find paired barcode
-                        List<BoxNumber> pairedBoxNumbers = boxNumberRepository.findByBoxBarcodeAndBoxNumber(boxBarcode, boxNumber);
+                        List<BoxNumber> pairedBoxNumbers = boxNumberRepository.findByBoxBarcodeAndBoxNumber(boxBarcode, originalBoxNumber);
                         List<String> pairedBarcodes = pairedBoxNumbers.stream()
                             .filter(bn -> bn.getProductBarcode() != null && !bn.getProductBarcode().isEmpty())
                             .map(BoxNumber::getProductBarcode)
@@ -957,6 +976,10 @@ public class StockService {
                     
                         for (String pairedBarcode : pairedBarcodes) {
                             if (inStockService.isInStock(pairedBarcode)) {
+                                // Get the paired item's in_stock details
+                                InStock pairedInStockDetails = inStockService.getInStockDetails(pairedBarcode);
+                                Integer pairedBoxNumber = pairedInStockDetails != null ? pairedInStockDetails.getBoxNumber() : originalBoxNumber;
+                                
                                 // Remove paired barcode from in_stock
                                 inStockService.removeFromStock(pairedBarcode);
                                 
@@ -968,7 +991,7 @@ public class StockService {
                                     employeeId,
                                     shopName,
                                     note + " (paired with " + productBarcode + ")", 
-                                    boxNumber,
+                                    pairedBoxNumber,
                                     orderId
                                 );
                                 
@@ -980,7 +1003,7 @@ public class StockService {
                                     "lent",
                                     note + " (paired with " + productBarcode + ")"
                                 );
-                                pairedLog.setBoxNumber(boxNumber);
+                                pairedLog.setBoxNumber(pairedBoxNumber);
                                 pairedLog.setOrderId(orderId);
                                 logsService.save(pairedLog);
                             }
@@ -997,7 +1020,7 @@ public class StockService {
                         employeeId,
                         shopName,
                         note,
-                        boxNumber,
+                        originalBoxNumber, // Use original box number from in_stock
                         orderId
                     );
                 } else {
@@ -1019,10 +1042,10 @@ public class StockService {
                     productBarcode,
                     "lent",
                     note,
-                    isSerializedProduct ? boxNumber : null, // Set boxNumber to null for non-serialized products
+                    isSerializedProduct ? originalBoxNumber : null, // Use original box number for serialized products
                     quantity
                 );
-                lentLog.setBoxNumber(isSerializedProduct ? boxNumber : null); // Set boxNumber to null for non-serialized products
+                lentLog.setBoxNumber(isSerializedProduct ? originalBoxNumber : null);
                 lentLog.setOrderId(orderId);
                 logsService.save(lentLog);
                 
@@ -1033,6 +1056,9 @@ public class StockService {
                 lentStock.setQuantity(lentStock.getQuantity() - lentQuantityToDeduct);
                 lentStock.setLastUpdated(LocalDateTime.now());
                 currentStockRepository.save(lentStock);
+
+                // Sync current stock with in_stock to ensure accurate quantity
+                syncCurrentStockWithInStock(boxBarcode, productName);
                 break;
                 
             case "broken":
@@ -1237,7 +1263,7 @@ public class StockService {
                 if (processed.contains(barcode)) continue;
                 String pairBarcode = null;
                 try {
-                    int number = extractNumber(barcode);
+                    long number = extractNumber(barcode);
                     String prefix = barcode.replaceAll("\\d+$", "");
                     if (number % 2 == 0) {
                         pairBarcode = prefix + (number - 1);
@@ -1445,32 +1471,46 @@ public class StockService {
     }
     
     /**
+     * Extract a number from a barcode string
+     * @param barcode The barcode to extract a number from
+     * @return The extracted number
+     * @throws NumberFormatException if no number can be extracted
+     */
+    private long extractNumber(String barcode) {
+        if (barcode == null || barcode.isEmpty()) {
+            throw new NumberFormatException("Barcode is null or empty");
+        }
+        
+        // Extract the last sequence of digits from the barcode
+        String numberPart = barcode.replaceAll(".*?(\\d+)(?:-PAIR)?$", "$1");
+        if (numberPart.matches("\\d+")) {
+            return Long.parseLong(numberPart);
+        }
+        
+        // No number found
+        throw new NumberFormatException("No number found in barcode: " + barcode);
+    }
+
+    /**
      * Generate a paired barcode by incrementing or decrementing based on odd/even
      * Odd numbers should be paired with number+1, even numbers with number-1
      */
     public String generatePairedBarcode(String barcode) {
-        // If the barcode ends with a number, increment or decrement based on odd/even
-        if (barcode.matches(".*\\d+$")) {
+        try {
             // Extract the numeric suffix
-            String prefix = barcode.replaceAll("\\d+$", "");
-            String numberPart = barcode.replaceAll("^.*?(?=(\\d+)$)", "");
+            long number = extractNumber(barcode);
+            String prefix = barcode.replaceAll("\\d+(?:-PAIR)?$", "");
             
-            try {
-                int number = Integer.parseInt(numberPart);
-                // If the number is odd, increment it to get the next even number
-                if (number % 2 != 0) {
-                    return prefix + (number + 1);
-                } else {
-                    // If the number is even, decrement it to get the previous odd number
-                    return prefix + (number - 1);
-                }
-            } catch (NumberFormatException e) {
-                logger.warn("Failed to parse number from barcode: {}", barcode);
-                return barcode + "-PAIR";
+            // If the number is odd, increment it to get the next even number
+            if (number % 2 != 0) {
+                return prefix + (number + 1);
+            } else {
+                // If the number is even, decrement it to get the previous odd number
+                return prefix + (number - 1);
             }
-        } else {
-            // If no number pattern at all, append "-PAIR"
-            return barcode + "-PAIR";
+        } catch (NumberFormatException e) {
+            logger.error("Failed to generate paired barcode for {}: {}", barcode, e.getMessage());
+            throw new InvalidInputException("Invalid barcode format. Unable to determine pair for: " + barcode);
         }
     }
 
@@ -1878,92 +1918,30 @@ public class StockService {
     }
 
     /**
-     * Extract a number from a barcode string
-     * @param barcode The barcode to extract a number from
-     * @return The extracted number
-     * @throws NumberFormatException if no number can be extracted
-     */
-    private int extractNumber(String barcode) {
-        if (barcode == null || barcode.isEmpty()) {
-            throw new NumberFormatException("Barcode is null or empty");
-        }
-        
-        // If the barcode ends with a number, extract it
-        if (barcode.matches(".*\\d+$")) {
-            String numberPart = barcode.replaceAll("^.*?(?=(\\d+)$)", "");
-            return Integer.parseInt(numberPart);
-        } else if (barcode.matches(".*\\d+.*")) {
-            // If there are numbers in the middle, extract the last one
-            String[] parts = barcode.split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
-            for (int i = parts.length - 1; i >= 0; i--) {
-                if (parts[i].matches("\\d+")) {
-                    return Integer.parseInt(parts[i]);
-                }
-            }
-        }
-        
-        // No number found
-        throw new NumberFormatException("No number found in barcode: " + barcode);
-    }
-
-    /**
      * Generate an auto-filled barcode based on the last barcode
      */
     private String generateAutoFilledBarcode(String lastBarcode) {
-        // If the barcode ends with a number, increment it
-        if (lastBarcode.matches(".*\\d+$")) {
-            // Extract the numeric suffix
-            String prefix = lastBarcode.replaceAll("\\d+$", "");
-            String numberPart = lastBarcode.replaceAll("^.*?(?=(\\d+)$)", "");
-            
-            try {
-                int number = Integer.parseInt(numberPart);
-                return prefix + (number + 1);
-            } catch (NumberFormatException e) {
-                logger.warn("Failed to parse number from barcode: {}", lastBarcode);
-                return lastBarcode + "-AUTO";
-            }
-        } else if (lastBarcode.matches(".*\\d+.*")) {
-            // If there are numbers in the middle, try to increment the last numeric part
-            String[] parts = lastBarcode.split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
-            StringBuilder result = new StringBuilder();
-            
-            // Find the last numeric part and increment it
-            boolean incremented = false;
-            for (int i = parts.length - 1; i >= 0; i--) {
-                if (!incremented && parts[i].matches("\\d+")) {
-                    try {
-                        int number = Integer.parseInt(parts[i]);
-                        parts[i] = String.valueOf(number + 1);
-                        incremented = true;
-                    } catch (NumberFormatException e) {
-                        logger.warn("Failed to parse number from part: {}", parts[i]);
-                    }
-                }
-            }
-            
-            // Rebuild the barcode
-            for (String part : parts) {
-                result.append(part);
-            }
-            
-            return incremented ? result.toString() : lastBarcode + "-AUTO";
-        } else {
-            // If no number pattern at all, append "-AUTO"
-            return lastBarcode + "-AUTO";
+        if (lastBarcode == null || lastBarcode.isEmpty()) {
+            return null;
+        }
+        
+        try {
+            long number = extractNumber(lastBarcode);
+            String prefix = lastBarcode.substring(0, lastBarcode.length() - String.valueOf(number).length());
+            return String.format("%s%d", prefix, number + 1);
+        } catch (Exception e) {
+            logger.error("Failed to generate auto-filled barcode: {}", e.getMessage());
+            return null;
         }
     }
 
     /**
-     * Synchronize CurrentStock with actual items in InStock
-     * This should be called after operations that modify stock
+     * Helper method to sync stock after operations for serialized products
      */
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    private void syncCurrentStockWithInStock(String boxBarcode, String productName) {
-        logger.info("Syncing CurrentStock with InStock for box {} and product {}", boxBarcode, productName);
-        
+    public void syncCurrentStockWithInStock(String boxBarcode, String productName) {
         try {
-            // Get product from catalog to check if it's serialized
+            // Get product from catalog
             ProductCatalog product = productCatalogRepository.findById(boxBarcode)
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + boxBarcode));
             
@@ -2004,21 +1982,6 @@ public class StockService {
     }
 
     /**
-     * Helper method to sync stock after operations for serialized products
-     */
-    private void syncStockIfSerialized(String boxBarcode, ProductCatalog product) {
-        if (product.getNumberSn() > 0) {
-            syncCurrentStockWithInStock(boxBarcode, product.getProductName());
-        }
-    }
-
-    // Let me search for the specific methods to modify
-    // I'll need to find the exact locations of addStock, removeStock, and moveStockImpl
-    // Then I'll add the sync calls at the appropriate places
-
-    // ... existing code ...
-
-    /**
      * Return an item from a sales order back to stock (no lent logic)
      */
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -2052,7 +2015,7 @@ public class StockService {
             syncCurrentStockWithInStock(boxBarcode, productName);
 
             // Log
-            Logs log = logsService.createLog(boxBarcode, productName, productBarcode, "return_from_sales", note);
+            Logs log = logsService.createLog(boxBarcode, productName, productBarcode, "return_from_sales", note, boxNumber);
             logsService.save(log);
         } else {
             // Non-serialized: just increase quantity

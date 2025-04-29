@@ -1,20 +1,33 @@
+import Cookies from 'js-cookie';
+
 // Use environment variable for API URL with fallback
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mainventory.onrender.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 // Generic API call function with error handling
 async function apiCall(endpoint, options = {}) {
     try {
-        console.log(`Making API call to ${endpoint}`, options); // Debug log
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        // Remove /api prefix from endpoint if API_BASE_URL already includes it
+        const cleanEndpoint = endpoint.startsWith('/api/') ? endpoint.substring(4) : endpoint;
+        const url = `${API_BASE_URL}${cleanEndpoint.startsWith('/') ? cleanEndpoint : '/' + cleanEndpoint}`;
+        console.log(`Making API call to ${url}`, options); // Debug log
+
+        // Get token from cookies
+        const token = Cookies.get('token');
+        
+        const response = await fetch(url, {
             ...options,
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                ...(token && { 'Authorization': `Bearer ${token}` }),
                 ...options.headers,
             },
             credentials: 'include', // Include credentials for CORS
             mode: 'cors', // Enable CORS mode
         });
+
+        console.log('Response status:', response.status); // Debug log
+        console.log('Response headers:', Object.fromEntries(response.headers.entries())); // Debug log
 
         // For DELETE operations that return no content
         if (response.status === 204) {
@@ -23,16 +36,27 @@ async function apiCall(endpoint, options = {}) {
 
         // Only try to parse JSON if there's content
         const text = await response.text();
+        console.log('Response text:', text); // Debug log
+        
         const data = text ? JSON.parse(text) : null;
+        console.log('Parsed data:', data); // Debug log
         
         if (!response.ok) {
-            console.error('API Error:', data); // Debug log
-            throw new Error(data?.message || 'Something went wrong');
+            console.error('API Error:', {
+                status: response.status,
+                statusText: response.statusText,
+                data: data
+            }); // Debug log
+            throw new Error(data?.message || `HTTP error! status: ${response.status}`);
         }
 
         return data;
     } catch (error) {
-        console.error('API Call Error:', error); // Debug log
+        console.error('API Call Error:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+        }); // Debug log
         throw error;
     }
 }
@@ -69,8 +93,7 @@ export const productApi = {
         const params = new URLSearchParams({
             boxBarcode: productData.boxBarcode,
             productName: productData.productName,
-            numberSn: productData.numberSn,
-            description: productData.description || ''
+            numberSn: productData.numberSn
         });
         return apiCall(`/products?${params.toString()}`, {
             method: 'POST'
@@ -210,7 +233,9 @@ export const orderApi = {
                 shopName: invoice.shopName,
                 timestamp: invoice.timestamp,
                 type: 'sales',
-                note: invoice.note
+                note: invoice.note,
+                editCount: invoice.editCount,
+                editHistory: invoice.editHistory
             })),
             totalPages: response.totalPages,
             totalElements: response.totalElements
@@ -228,10 +253,22 @@ export const orderApi = {
         if (search) {
             params.append('search', search);
         }
+        console.log('Fetching lent orders with params:', params.toString());
         const response = await apiCall(`/lent-ids?${params.toString()}`);
+        console.log('Raw lent orders response:', response);
+        
+        if (!response || !Array.isArray(response.content)) {
+            console.error('Invalid response format:', response);
+            return {
+                content: [],
+                totalPages: 0,
+                totalElements: 0
+            };
+        }
+        
         return {
             content: response.content.map(lent => ({
-                orderId: lent.lentId,
+                lentId: lent.lentId,
                 employeeId: lent.employeeId,
                 shopName: lent.shopName,
                 timestamp: lent.timestamp,
@@ -538,5 +575,24 @@ export const logsApi = {
             console.error('Error fetching logs:', error);
             throw new Error(error.response?.data?.message || 'Failed to fetch logs');
         }
+    }
+};
+
+// InStock API functions
+export const inStockApi = {
+    // Get all in stock items
+    getAllInStock: async () => {
+        const response = await apiCall('/in-stock');
+        return response;
+    },
+
+    // Get in stock items by box barcode
+    getInStockByBoxBarcode: async (boxBarcode) => {
+        return apiCall(`/in-stock/box/${boxBarcode}`);
+    },
+
+    // Get in stock item by product barcode
+    getInStockByProductBarcode: async (productBarcode) => {
+        return apiCall(`/in-stock/product/${productBarcode}`);
     }
 }; 

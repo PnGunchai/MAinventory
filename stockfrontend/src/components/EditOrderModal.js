@@ -9,6 +9,13 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
   const [note, setNote] = useState('');
   const [newNote, setNewNote] = useState('');
   const [showAddItemsModal, setShowAddItemsModal] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState({
+    isOpen: false,
+    productName: null,
+    productBarcode: null,
+    boxBarcode: null,
+    quantity: null
+  });
 
   useEffect(() => {
     if (isOpen && order) {
@@ -31,8 +38,19 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
     }
   };
 
-  const handleRemoveItem = async (productBarcode, boxBarcode, quantity) => {
+  const handleRemoveItem = async (productBarcode, boxBarcode, quantity, productName) => {
+    setDeleteConfirmation({
+      isOpen: true,
+      productName,
+      productBarcode,
+      boxBarcode,
+      quantity
+    });
+  };
+
+  const handleDeleteConfirm = async () => {
     try {
+      const { productBarcode, boxBarcode, quantity } = deleteConfirmation;
       // For serial products, use the product barcode directly
       // For non-serial products, use boxBarcode:quantity format
       const identifier = productBarcode ? productBarcode : `${boxBarcode}:${quantity}`;
@@ -44,7 +62,25 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
     } catch (err) {
       setError('Failed to remove item');
       console.error(err);
+    } finally {
+      setDeleteConfirmation({
+        isOpen: false,
+        productName: null,
+        productBarcode: null,
+        boxBarcode: null,
+        quantity: null
+      });
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmation({
+      isOpen: false,
+      productName: null,
+      productBarcode: null,
+      boxBarcode: null,
+      quantity: null
+    });
   };
 
   const handleUpdateNotes = async () => {
@@ -130,7 +166,7 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
-                          onClick={() => handleRemoveItem(item.productBarcode, item.boxBarcode, item.quantity)}
+                          onClick={() => handleRemoveItem(item.productBarcode, item.boxBarcode, item.quantity, item.productName)}
                           className="text-red-600 hover:text-red-800"
                         >
                           ✕
@@ -146,7 +182,6 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
 
         <div className="border-t pt-4 mt-4">
           <h3 className="text-lg font-medium text-gray-900 mb-2">Notes</h3>
-          {/* Only show new note input */}
           <textarea
             value={newNote}
             onChange={(e) => setNewNote(e.target.value)}
@@ -181,6 +216,36 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
               if (onOrderUpdated) onOrderUpdated();
             }}
           />
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {deleteConfirmation.isOpen && (
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Confirm Delete
+              </h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Are you sure you want to remove "{deleteConfirmation.productName}" from this order?
+                {!deleteConfirmation.productBarcode && ` (${deleteConfirmation.quantity} units)`}
+                This action cannot be undone.
+              </p>
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={handleDeleteCancel}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

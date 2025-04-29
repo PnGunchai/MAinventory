@@ -3,8 +3,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { productApi } from '@/services/api';
 import { debounce } from 'lodash';
+import { useAuthStore } from '@/store/authStore';
 
 export default function Stock() {
+  const hasPermission = useAuthStore(state => state.hasPermission);
+  
   // State for showing/hiding add/remove pages
   const [showAddPage, setShowAddPage] = useState(false);
   const [showRemovePage, setShowRemovePage] = useState(false);
@@ -19,6 +22,7 @@ export default function Stock() {
 
   // Product details state
   const [productDetails, setProductDetails] = useState({});
+  const [stockProductDetails, setStockProductDetails] = useState({});
 
   // Form states
   const [addFormData, setAddFormData] = useState({
@@ -41,19 +45,42 @@ export default function Stock() {
   const [formError, setFormError] = useState(null);
 
   // Load stock data
-    const loadStockData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await productApi.getCurrentStock();
-        setStockData(data);
-      } catch (err) {
-        console.error('Error loading stock data:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+  const loadStockData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await productApi.getCurrentStock();
+      
+      // Fetch product details for each unique product name
+      const details = {};
+      for (const item of data) {
+        if (!details[item.productName]) {
+          try {
+            const products = await productApi.getProducts();
+            const product = products.data.find(p => p.productName === item.productName);
+            if (product) {
+              details[item.productName] = product;
+            }
+          } catch (err) {
+            console.error(`Error fetching details for ${item.productName}:`, err);
+          }
+        }
       }
-    };
+
+      // Combine stock data with product details
+      const enrichedData = data.map(item => ({
+        ...item,
+        numberSn: details[item.productName]?.numberSn || 0
+      }));
+
+      setStockData(enrichedData);
+    } catch (err) {
+      console.error('Error loading stock data:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadStockData();
@@ -276,28 +303,30 @@ export default function Stock() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-black">Current Stock</h1>
-        <div className="space-x-4">
-          <button
-            onClick={() => {
-              setShowAddPage(true);
-              setShowRemovePage(false);
-              setFormError(null);
-            }}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-          >
-            Add (+)
-          </button>
-          <button
-            onClick={() => {
-              setShowRemovePage(true);
-              setShowAddPage(false);
-              setFormError(null);
-            }}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Remove (-)
-          </button>
-        </div>
+        {hasPermission('canAddStock') && (
+          <div className="space-x-4">
+            <button
+              onClick={() => {
+                setShowAddPage(true);
+                setShowRemovePage(false);
+                setFormError(null);
+              }}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Add (+)
+            </button>
+            <button
+              onClick={() => {
+                setShowRemovePage(true);
+                setShowAddPage(false);
+                setFormError(null);
+              }}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Remove (-)
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Search Box */}
@@ -352,6 +381,12 @@ export default function Stock() {
                     {productDetails[addFormData.boxBarcode] && (
                       <div className="mt-1 text-sm text-gray-600">
                         Product: {productDetails[addFormData.boxBarcode].productName}
+                        <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium" style={{
+                          backgroundColor: productDetails[addFormData.boxBarcode].numberSn === 2 ? '#EDE9FE' : productDetails[addFormData.boxBarcode].numberSn === 1 ? '#E0F2FE' : '#F3F4F6',
+                          color: productDetails[addFormData.boxBarcode].numberSn === 2 ? '#5B21B6' : productDetails[addFormData.boxBarcode].numberSn === 1 ? '#0369A1' : '#374151'
+                        }}>
+                          {productDetails[addFormData.boxBarcode].numberSn}SN
+                        </span>
                       </div>
                     )}
                   </div>
@@ -484,6 +519,12 @@ export default function Stock() {
                     {productDetails[removeFormData.boxBarcode] && (
                       <div className="mt-1 text-sm text-gray-600">
                         Product: {productDetails[removeFormData.boxBarcode].productName}
+                        <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium" style={{
+                          backgroundColor: productDetails[removeFormData.boxBarcode].numberSn === 2 ? '#EDE9FE' : productDetails[removeFormData.boxBarcode].numberSn === 1 ? '#E0F2FE' : '#F3F4F6',
+                          color: productDetails[removeFormData.boxBarcode].numberSn === 2 ? '#5B21B6' : productDetails[removeFormData.boxBarcode].numberSn === 1 ? '#0369A1' : '#374151'
+                        }}>
+                          {productDetails[removeFormData.boxBarcode].numberSn}SN
+                        </span>
                       </div>
                     )}
                   </div>
@@ -584,6 +625,9 @@ export default function Stock() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
                   Product Name
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
+                  SN Type
+                </th>
                 <th 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('totalQuantity')}
@@ -605,9 +649,6 @@ export default function Stock() {
                       {getSortIndicator('lastUpdated')}
                     </span>
                   </div>
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                  Highest Box #
                 </th>
               </tr>
             </thead>
@@ -636,14 +677,21 @@ export default function Stock() {
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                       {item.productName}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={{
+                        backgroundColor: item.numberSn === 2 ? '#EDE9FE' : 
+                                      item.numberSn === 1 ? '#E0F2FE' : '#F3F4F6',
+                        color: item.numberSn === 2 ? '#5B21B6' : 
+                               item.numberSn === 1 ? '#0369A1' : '#374151'
+                      }}>
+                        {item.numberSn || 0}SN
+                      </span>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                       {item.totalQuantity}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                       {new Date(item.lastUpdated).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">
-                      {item.highestBoxNumber}
                     </td>
                   </tr>
                 ))
