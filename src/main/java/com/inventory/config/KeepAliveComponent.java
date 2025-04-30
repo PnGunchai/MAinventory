@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 public class KeepAliveComponent implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
-        // Comment out this line to allow normal application lifecycle
-        // Thread.currentThread().join();
+        // Keep the application running
+        Thread.currentThread().join();
         
         // Just log that the application has started
         System.out.println("Application started successfully");
