@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS lent_id (
     lent_id VARCHAR(50) PRIMARY KEY,
     employee_id VARCHAR(50) NOT NULL,
     shop_name VARCHAR(100) NOT NULL,
-    timestamp TIMESTAMP NOT NULL,
+    timestamp TIMESTAMPTZ NOT NULL,
     note TEXT,
     status VARCHAR(20) NOT NULL,
     box_barcode VARCHAR(255),
@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS invoice (
     invoice VARCHAR(50) NOT NULL,
     employee_id VARCHAR(10) NOT NULL,
     shop_name VARCHAR(100) NOT NULL,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    last_modified TIMESTAMP,
+    timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    last_modified TIMESTAMPTZ,
     edit_count INTEGER DEFAULT 0,
     edit_history TEXT,
     note TEXT
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS logs (
     product_name VARCHAR(100) NOT NULL,
     product_barcode VARCHAR(50),
     operation VARCHAR(10) NOT NULL CHECK (operation IN ('add', 'remove', 'sales', 'lent', 'returned', 'broken')),
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     note TEXT,
     box_number INTEGER,
     order_id VARCHAR(50),
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS current_stock (
     box_barcode VARCHAR(50) NOT NULL,
     product_name VARCHAR(100) NOT NULL,
     quantity INTEGER NOT NULL DEFAULT 0,
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_updated TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     box_number INTEGER,
     FOREIGN KEY (box_barcode, product_name) REFERENCES product_catalog(box_barcode, product_name)
 );
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS sales (
     product_name VARCHAR(100) NOT NULL,
     product_barcode VARCHAR(50),
     employee_id VARCHAR(10) NOT NULL,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     box_number INTEGER,
     note TEXT,
     shop_name VARCHAR(100) NOT NULL,
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS lend (
     product_barcode VARCHAR(50),
     employee_id VARCHAR(10) NOT NULL,
     shop_name VARCHAR(100) NOT NULL,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     box_number INTEGER,
     note TEXT,
     status VARCHAR(20) DEFAULT 'lent',
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS broken (
     product_name VARCHAR(100) NOT NULL,
     product_barcode VARCHAR(50),
     condition VARCHAR(255) NOT NULL,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     box_number INTEGER,
     note TEXT,
     quantity INTEGER DEFAULT 1,
@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS broken (
 -- Table: broken_id
 CREATE TABLE IF NOT EXISTS broken_id (
     broken_id VARCHAR(50) PRIMARY KEY,
-    timestamp TIMESTAMP NOT NULL,
+    timestamp TIMESTAMPTZ NOT NULL,
     note TEXT
 );
 
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS box_number (
     product_name VARCHAR(100) NOT NULL,
     box_number INTEGER NOT NULL,
     product_barcode VARCHAR(50),
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_updated TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (box_barcode, product_name) REFERENCES product_catalog(box_barcode, product_name)
 );
 
@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS box_number (
 CREATE OR REPLACE FUNCTION update_last_updated_column()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.last_updated = CURRENT_TIMESTAMP;
+    NEW.last_updated = CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Bangkok';
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
