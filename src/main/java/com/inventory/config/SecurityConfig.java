@@ -70,8 +70,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
             "http://localhost:3000",
             "https://mainventory.vercel.app",
-            "https://*.vercel.app",  // Allow all subdomains on vercel.app
-            "https://mainventory.onrender.com"  // Allow the Render backend
+            "https://*.vercel.app",
+            "https://mainventory.onrender.com"
         )); 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList(

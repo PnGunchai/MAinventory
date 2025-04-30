@@ -15,8 +15,8 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                     .allowedOrigins(
-                        "https://mainventory.vercel.app",
-                        "http://localhost:3000"  // for local development
+                        "http://localhost:3000",
+                        "https://mainventory.vercel.app"
                     )
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                     .allowedHeaders("*")

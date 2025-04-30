@@ -905,6 +905,14 @@ public class LentOrderService {
         soldPortion.setNote("Split sale: " + requestedQuantity + " of " + initialQuantity);
         lendRepository.save(soldPortion);
 
+        // Update the original lent record
+        originalLentItem.setStatus("processed");
+        originalLentItem.setQuantity(0);
+        originalLentItem.setNote(originalLentItem.getNote() != null ? 
+            originalLentItem.getNote() + " [Fully processed]" : 
+            "Fully processed");
+        lendRepository.save(originalLentItem);
+
         // Update order status
         updateOrderStatus(orderId);
         

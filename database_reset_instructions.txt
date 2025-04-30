@@ -1,0 +1,67 @@
+HOW TO RESET RENDER DATABASE
+============================
+
+1. CONNECT TO DATABASE
+--------------------
+Copy and paste this command in PowerShell:
+
+$env:PGPASSWORD="KhxNXt2AwQMLvcJDxkvfQE4OOZoCeotF"
+psql -h dpg-d086l0s9c44c73bjbu5g-a.singapore-postgres.render.com -U mainventory_postgres_1pyc_user mainventory_postgres_1pyc
+
+
+2. RESET DATABASE
+---------------
+After you see the prompt "mainventory_postgres_1pyc=>", type:
+
+\i reset.sql
+
+
+3. VERIFY RESET (Optional)
+------------------------
+Check if tables are empty by typing:
+
+SELECT COUNT(*) FROM product_catalog;
+SELECT COUNT(*) FROM current_stock;
+SELECT COUNT(*) FROM sales;
+
+All should return 0.
+
+
+4. EXIT DATABASE
+--------------
+Type this to exit:
+
+\q
+
+
+IF YOU DON'T HAVE reset.sql
+==========================
+Create a new file named "reset.sql" with this content:
+
+BEGIN;
+
+-- Delete in reverse order of dependencies
+DELETE FROM bulk_logs;
+DELETE FROM box_number;
+DELETE FROM sales;
+DELETE FROM lent;
+DELETE FROM broken;
+DELETE FROM logs;
+DELETE FROM current_stock;
+DELETE FROM in_stock;
+DELETE FROM invoice;
+DELETE FROM lent_id;
+DELETE FROM broken_id;
+DELETE FROM barcode_status;
+DELETE FROM product_catalog;
+-- Not deleting from users table to preserve login credentials
+
+COMMIT;
+
+
+IMPORTANT NOTES
+==============
+- This reset preserves user accounts
+- Make sure you have backups if needed
+- Password might change - check Render dashboard for current password
+- Always verify reset was successful 
