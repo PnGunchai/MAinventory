@@ -10,9 +10,6 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
-# Add health check
-HEALTHCHECK --interval=30s --timeout=3s CMD wget -q --spider http://localhost:8080/healthz || exit 1
-
 # Creating a non-root user for better security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
