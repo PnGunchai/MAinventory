@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 
 // Use environment variable for API URL with fallback
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mainventory.onrender.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'mainventory-production.up.railway.app';
 
 // Generic API call function with error handling
 async function apiCall(endpoint, options = {}) {
