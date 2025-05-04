@@ -162,7 +162,9 @@ export default function Stock() {
       setShowAddPage(false); // Close the modal
       setAddFormData({ boxBarcode: '', productBarcodes: [''], quantity: '', note: '' }); // Reset form
     } catch (err) {
-      setFormError(err.message);
+      // Prefer backend error message if available
+      const backendMsg = err?.data?.message || err?.data?.error || err.message || "API call failed";
+      setFormError(backendMsg);
     } finally {
       setAddProcessing(false);
     }
@@ -190,7 +192,9 @@ export default function Stock() {
       setShowRemovePage(false); // Close the modal
       setRemoveFormData({ boxBarcode: '', productBarcodes: [''], quantity: '', note: '' }); // Reset form
     } catch (err) {
-      setFormError(err.message);
+      // Prefer backend error message if available
+      const backendMsg = err?.data?.message || err?.data?.error || err.message || "API call failed";
+      setFormError(backendMsg);
     } finally {
       setRemoveProcessing(false);
     }
