@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 
 // Use environment variable for API URL with fallback
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'mainventory-production.up.railway.app';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'mainventory-production.up.railway.app/api';
 
 // Generic API call function with error handling
 async function apiCall(endpoint, options = {}) {
@@ -60,6 +60,11 @@ async function apiCall(endpoint, options = {}) {
         return data;
     } catch (error) {
         console.error('API call error:', error);
+        if (error.status === 401) {
+            window.alert('Session expired. Please log in again.');
+            window.location.href = '/login';
+            return; // Prevent further execution
+        }
         throw {
             status: error.status,
             data: error.data,

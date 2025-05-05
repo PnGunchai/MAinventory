@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { logsApi } from '@/services/api';
+import { useTranslation } from 'react-i18next';
 
 export default function Logs() {
+  const { i18n, t } = useTranslation();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -59,9 +61,16 @@ export default function Logs() {
     fetchLogs();
   }, [currentPage, debouncedSearchTerm]);
 
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'th' : 'en';
+    i18n.changeLanguage(newLang);
+  };
+
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-black">System Logs</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-black">{t('systemLogs')}</h1>
+      </div>
 
       {/* Search */}
       <div className="bg-white shadow rounded-lg p-4">
@@ -69,7 +78,7 @@ export default function Logs() {
           <div className="flex-1">
             <input
               type="text"
-              placeholder="Search by product name, box number, barcode, operation, or order ID..."
+              placeholder={t('searchByProductNameBoxNumberBarcodeOperationOrOrderID')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full rounded-lg border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900 placeholder-gray-400"
@@ -85,25 +94,25 @@ export default function Logs() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Time
+                  {t('time')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Product Name
+                  {t('productName')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Box Number
+                  {t('boxNumber')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Product Barcode
+                  {t('productBarcode')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Operation
+                  {t('operation')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Quantity
+                  {t('quantity')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Order ID
+                  {t('orderID')}
                 </th>
               </tr>
             </thead>
@@ -111,7 +120,7 @@ export default function Logs() {
               {loading ? (
                 <tr>
                   <td className="px-6 py-4 text-gray-700 text-center" colSpan="7">
-                    Loading logs...
+                    {t('loadingLogs')}
                   </td>
                 </tr>
               ) : error ? (
@@ -123,7 +132,7 @@ export default function Logs() {
               ) : logs.length === 0 ? (
                 <tr>
                   <td className="px-6 py-4 text-gray-700 text-center" colSpan="7">
-                    No logs found
+                    {t('noLogsFound')}
                   </td>
                 </tr>
               ) : (
@@ -149,7 +158,7 @@ export default function Logs() {
                       {log.productBarcode || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {log.operation || '-'}
+                      {log.operation ? t(log.operation) : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                       {log.quantity || 1}
@@ -168,7 +177,7 @@ export default function Logs() {
         <div className="px-4 py-3 border-t border-gray-200">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-700">
-              Page {currentPage + 1} of {totalPages}
+              {t('page')} {currentPage + 1} {t('of')} {totalPages}
             </div>
             <div className="space-x-2">
               <button
@@ -180,7 +189,7 @@ export default function Logs() {
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                Previous
+                {t('previous')}
               </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
@@ -191,7 +200,7 @@ export default function Logs() {
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                Next
+                {t('next')}
               </button>
             </div>
           </div>

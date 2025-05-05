@@ -1,34 +1,24 @@
 import React from 'react';
-import { SingleDestination, ItemDestination, SplitDestinations } from '../types/lent';
 import { SplitDestinationInput } from './SplitDestinationInput';
+import { useTranslation } from 'react-i18next';
 
-interface DestinationSelectorProps {
-    identifier: string;
-    isNonSerialized: boolean;
-    quantity: number;
-    initialDestination?: ItemDestination;
-    onChange: (identifier: string, destination: ItemDestination) => void;
-}
-
-export const DestinationSelector: React.FC<DestinationSelectorProps> = ({
+export const DestinationSelector = ({
     identifier,
     isNonSerialized,
     quantity,
     initialDestination,
     onChange
 }) => {
-    const handleSingleDestinationChange = (destination: SingleDestination) => {
+    const { t } = useTranslation();
+    const handleSingleDestinationChange = (destination) => {
         onChange(identifier, { destination });
     };
-
-    const handleSplitDestinationsChange = (identifier: string, splitDestinations: SplitDestinations) => {
+    const handleSplitDestinationsChange = (identifier, splitDestinations) => {
         onChange(identifier, { destination: 'split', splitDestinations });
     };
-
     return (
         <div className="space-y-4">
             {isNonSerialized ? (
-                // For non-serialized products, show split destination inputs
                 <SplitDestinationInput
                     identifier={identifier}
                     totalQuantity={quantity}
@@ -36,7 +26,6 @@ export const DestinationSelector: React.FC<DestinationSelectorProps> = ({
                     onChange={handleSplitDestinationsChange}
                 />
             ) : (
-                // For serialized products, show single destination selector
                 <div className="flex space-x-4">
                     <button
                         onClick={() => handleSingleDestinationChange('return')}
@@ -46,7 +35,7 @@ export const DestinationSelector: React.FC<DestinationSelectorProps> = ({
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                     >
-                        Return
+                        {t('return')}
                     </button>
                     <button
                         onClick={() => handleSingleDestinationChange('sales')}
@@ -56,7 +45,7 @@ export const DestinationSelector: React.FC<DestinationSelectorProps> = ({
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                     >
-                        Sales
+                        {t('sales')}
                     </button>
                     <button
                         onClick={() => handleSingleDestinationChange('broken')}
@@ -66,7 +55,7 @@ export const DestinationSelector: React.FC<DestinationSelectorProps> = ({
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                     >
-                        Broken
+                        {t('broken')}
                     </button>
                 </div>
             )}

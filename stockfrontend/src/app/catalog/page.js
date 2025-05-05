@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { productApi } from '@/services/api';
+import { useTranslation } from 'react-i18next';
 
 export default function Catalog() {
+  const { i18n, t } = useTranslation();
   // State for form data
   const [formData, setFormData] = useState({
     boxBarcode: '',
@@ -201,7 +203,9 @@ export default function Catalog() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-black">Product Catalog</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-black">{t('productCatalog')}</h1>
+      </div>
 
       {/* Error message */}
       {error && (
@@ -213,35 +217,35 @@ export default function Catalog() {
       {/* Add Product Form */}
       <div className="bg-white shadow rounded-lg">
         <form onSubmit={handleSubmit} className="p-4">
-          <h2 className="text-xl font-semibold text-black mb-4">Add New Product</h2>
+          <h2 className="text-xl font-semibold text-black mb-4">{t('addNewProduct')}</h2>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-900">Box Barcode *</label>
+                <label className="block text-sm font-medium text-gray-900">{t('boxBarcode')} *</label>
                 <input
                   type="text"
                   name="boxBarcode"
                   value={formData.boxBarcode}
                   onChange={handleInputChange}
                   className="mt-1 block w-full rounded-lg border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900"
-                  placeholder="Enter box barcode"
+                  placeholder={t('enterBoxBarcode')}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-900">Product Name *</label>
+                <label className="block text-sm font-medium text-gray-900">{t('productName')} *</label>
                 <input
                   type="text"
                   name="productName"
                   value={formData.productName}
                   onChange={handleInputChange}
                   className="mt-1 block w-full rounded-lg border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900"
-                  placeholder="Enter product name"
+                  placeholder={t('enterProductName')}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-900">Serial Number Type *</label>
+                <label className="block text-sm font-medium text-gray-900">{t('serialNumberType')} *</label>
                 <select
                   name="numberSn"
                   value={formData.numberSn}
@@ -249,9 +253,9 @@ export default function Catalog() {
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900"
                   required
                 >
-                  <option value={0}>SN=0 (Non-serialized product)</option>
-                  <option value={1}>SN=1 (One serial number per box)</option>
-                  <option value={2}>SN=2 (Pair serial numbers per box)</option>
+                  <option value={0}>{t('sn0NonSerializedProduct')}</option>
+                  <option value={1}>{t('sn1OneSerialPerBox')}</option>
+                  <option value={2}>{t('sn2PairSerialsPerBox')}</option>
                 </select>
               </div>
             </div>
@@ -261,7 +265,7 @@ export default function Catalog() {
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                 disabled={loading}
               >
-                {loading ? 'Adding...' : 'Add Product'}
+                {loading ? t('adding') : t('addProduct')}
               </button>
             </div>
           </div>
@@ -276,7 +280,7 @@ export default function Catalog() {
             <div className="md:col-span-2">
               <input
                 type="text"
-                placeholder="Search by product name or box barcode..."
+                placeholder={t('searchByProductNameOrBoxBarcode')}
                 className="w-full rounded-lg border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900 placeholder-gray-400"
                 value={searchTerm}
                 onChange={handleSearch}
@@ -288,10 +292,10 @@ export default function Catalog() {
                 value={snFilter}
                 onChange={handleSnFilterChange}
               >
-                <option value="all">All Serial Number Types</option>
-                <option value="0">SN=0 (Non-serialized)</option>
-                <option value="1">SN=1 (Single Serial)</option>
-                <option value="2">SN=2 (Pair Serial)</option>
+                <option value="all">{t('allSerialNumberTypes')}</option>
+                <option value="0">{t('sn0NonSerialized')}</option>
+                <option value="1">{t('sn1SingleSerial')}</option>
+                <option value="2">{t('sn2PairSerial')}</option>
               </select>
             </div>
           </div>
@@ -319,7 +323,7 @@ export default function Catalog() {
                   onClick={() => handleColumnSort('boxBarcode')}
                 >
                   <div className="flex items-center justify-between">
-                    <span>Box Barcode</span>
+                    <span>{t('boxBarcode')}</span>
                     <span className={`transform transition-all duration-200 ${sortField === 'boxBarcode' ? 'opacity-100' : 'opacity-50'}`}>
                       {getSortIndicator('boxBarcode')}
                     </span>
@@ -330,7 +334,7 @@ export default function Catalog() {
                   onClick={() => handleColumnSort('productName')}
                 >
                   <div className="flex items-center justify-between">
-                    <span>Product Name</span>
+                    <span>{t('productName')}</span>
                     <span className={`transform transition-all duration-200 ${sortField === 'productName' ? 'opacity-100' : 'opacity-50'}`}>
                       {getSortIndicator('productName')}
                     </span>
@@ -341,7 +345,7 @@ export default function Catalog() {
                   onClick={() => handleColumnSort('numberSn')}
                 >
                   <div className="flex items-center justify-between">
-                    <span>Serial Number Type</span>
+                    <span>{t('serialNumberType')}</span>
                     <span className={`transform transition-all duration-200 ${sortField === 'numberSn' ? 'opacity-100' : 'opacity-50'}`}>
                       {getSortIndicator('numberSn')}
                     </span>
@@ -350,7 +354,7 @@ export default function Catalog() {
                 <th 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider"
                 >
-                  Actions
+                  {t('actions')}
                 </th>
               </tr>
             </thead>
@@ -358,7 +362,7 @@ export default function Catalog() {
               {loading ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-4 text-center text-gray-900">
-                    Loading...
+                    {t('loading')}
                   </td>
                 </tr>
               ) : error ? (
@@ -370,7 +374,7 @@ export default function Catalog() {
               ) : products.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-4 text-center text-gray-900">
-                    No products found
+                    {t('noProductsFound')}
                   </td>
                 </tr>
               ) : (
@@ -393,7 +397,7 @@ export default function Catalog() {
                         onClick={() => handleDeleteClick(product.boxBarcode, product.productName)}
                         className="text-red-600 hover:text-red-900 transition-all duration-200 hover:scale-105"
                       >
-                        Delete
+                        {t('delete')}
                       </button>
                     </td>
                   </tr>
@@ -407,8 +411,7 @@ export default function Catalog() {
         <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-900">
-              Showing <span className="font-medium">{products.length}</span> of{' '}
-              <span className="font-medium">{totalItems}</span> results
+              {t('showingResults', { productsLength: products.length, totalItems })}
             </div>
             <div className="flex items-center space-x-4">
               <select
@@ -419,9 +422,9 @@ export default function Catalog() {
                   setPage(0);
                 }}
               >
-                <option value="20">20 per page</option>
-                <option value="50">50 per page</option>
-                <option value="100">100 per page</option>
+                <option value="20">{t('perPage20')}</option>
+                <option value="50">{t('perPage50')}</option>
+                <option value="100">{t('perPage100')}</option>
               </select>
               <div className="space-x-2">
                 <button
@@ -429,14 +432,14 @@ export default function Catalog() {
                   onClick={() => setPage(Math.max(0, page - 1))}
                   disabled={page === 0 || loading}
                 >
-                  Previous
+                  {t('previous')}
                 </button>
                 <button
                   className="px-3 py-1 border rounded text-gray-900 hover:bg-gray-50"
                   onClick={() => setPage(page + 1)}
                   disabled={page >= totalPages - 1 || loading}
                 >
-                  Next
+                  {t('next')}
                 </button>
               </div>
             </div>
@@ -449,24 +452,24 @@ export default function Catalog() {
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Confirm Delete
+              {t('confirmDelete')}
             </h3>
             <p className="text-sm text-gray-500 mb-4">
-              Are you sure you want to delete the product "{deleteConfirmation.productName}" (Box Barcode: {deleteConfirmation.boxBarcode})?
-              This action cannot be undone.
+              {t('confirmDeleteMessage', { productName: deleteConfirmation.productName, boxBarcode: deleteConfirmation.boxBarcode })}
+              {t('confirmDeleteWarning')}
             </p>
             <div className="flex justify-end space-x-4">
               <button
                 onClick={handleDeleteCancel}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={handleDeleteConfirm}
                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md"
               >
-                Delete
+                {t('delete')}
               </button>
             </div>
           </div>

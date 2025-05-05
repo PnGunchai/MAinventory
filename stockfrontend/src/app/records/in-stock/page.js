@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { inStockApi } from '@/services/api';
 import { formatDateTime } from '@/utils/dateUtils';
+import { useTranslation } from 'react-i18next';
 
 export default function InStockPage() {
+    const { t } = useTranslation();
     const [inStockItems, setInStockItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -41,14 +43,14 @@ export default function InStockPage() {
     if (error) {
         return (
             <div className="p-4 text-center">
-                <p className="text-red-500">{error}</p>
+                <p className="text-red-500">{t('failedToFetchInStockItems')}</p>
             </div>
         );
     }
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-black">In-Stock Barcode</h1>
+            <h1 className="text-3xl font-bold text-black">{t('inStockBarcode')}</h1>
 
             {/* Search */}
             <div className="bg-white shadow rounded-lg">
@@ -57,7 +59,7 @@ export default function InStockPage() {
                         <div className="flex-1">
                             <input
                                 type="text"
-                                placeholder="Search by product name, barcode, or box number..."
+                                placeholder={t('searchByProductNameBoxNumberBarcode')}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="flex-1 rounded-lg border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900 placeholder-gray-400 w-full"
@@ -77,19 +79,19 @@ export default function InStockPage() {
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                        Product Name
+                                        {t('productName')}
                                     </th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                        Box Barcode
+                                        {t('boxBarcode')}
                                     </th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                        Product Barcode
+                                        {t('productBarcode')}
                                     </th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                        Box Number
+                                        {t('boxNumber')}
                                     </th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                        Added Date
+                                        {t('addedDate')}
                                     </th>
                                 </tr>
                             </thead>
@@ -108,7 +110,7 @@ export default function InStockPage() {
                                 {filteredItems.length === 0 && (
                                     <tr>
                                         <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
-                                            No items found
+                                            {t('noItemsFound')}
                                         </td>
                                     </tr>
                                 )}

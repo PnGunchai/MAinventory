@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { recordsApi } from '@/services/api';
+import { useTranslation } from 'react-i18next';
 
 export default function Records() {
+  const { i18n, t } = useTranslation();
   const [activeTab, setActiveTab] = useState('all');
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -95,12 +97,12 @@ export default function Records() {
   // Function to get status display
   const getStatusDisplay = (record) => {
     if (record.type === 'lent') {
-      return record.status || '-';
+      return t(record.status) || '-';
     }
     if (record.type === 'broken') {
-      return record.condition || '-';
+      return t(record.condition) || '-';
     }
-    return 'Sold';
+    return t('sold');
   };
 
   // Function to handle sort
@@ -120,9 +122,16 @@ export default function Records() {
     return sortDirection === 'asc' ? '↑' : '↓';
   };
 
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'th' : 'en';
+    i18n.changeLanguage(newLang);
+  };
+
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-black">Records</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-black">{t('records')}</h1>
+      </div>
 
       {/* Record Type Tabs */}
       <div className="bg-white shadow rounded-lg">
@@ -141,7 +150,7 @@ export default function Records() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm capitalize`}
               >
-                {tab === 'all' ? 'All Records' : `${tab}`}
+                {tab === 'all' ? t('allRecords') : t(tab)}
               </button>
             ))}
           </nav>
@@ -153,7 +162,7 @@ export default function Records() {
             <div className="flex-1">
               <input
                 type="text"
-                placeholder="Search by Order ID, Employee ID, Shop Name, Status..."
+                placeholder={t('searchByOrderIdEmployeeIdShopNameStatus')}
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -175,11 +184,11 @@ export default function Records() {
                   className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('orderId')}
                 >
-                  Order ID {renderSortIndicator('orderId')}
+                  {t('orderId')} {renderSortIndicator('orderId')}
                 </th>
                 {activeTab === 'all' && (
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Type
+                    {t('type')}
                   </th>
                 )}
                 <th 
@@ -187,37 +196,37 @@ export default function Records() {
                   className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('employeeId')}
                 >
-                  Employee ID {renderSortIndicator('employeeId')}
+                  {t('employeeId')} {renderSortIndicator('employeeId')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Product Name
+                  {t('productName')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Product Barcode
+                  {t('productBarcode')}
                 </th>
                 <th 
                   scope="col" 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('shopName')}
                 >
-                  Shop Name {renderSortIndicator('shopName')}
+                  {t('shopName')} {renderSortIndicator('shopName')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Quantity
+                  {t('quantity')}
                 </th>
                 <th 
                   scope="col" 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('status')}
                 >
-                  Status/Condition {renderSortIndicator('status')}
+                  {t('statusCondition')} {renderSortIndicator('status')}
                 </th>
                 <th 
                   scope="col" 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('timestamp')}
                 >
-                  Date {renderSortIndicator('timestamp')}
+                  {t('date')} {renderSortIndicator('timestamp')}
                 </th>
               </tr>
             </thead>
@@ -225,7 +234,7 @@ export default function Records() {
               {loading ? (
                 <tr>
                   <td className="px-6 py-4 text-gray-700 text-center" colSpan="7">
-                    Loading records...
+                    {t('loadingRecords')}
                   </td>
                 </tr>
               ) : error ? (
@@ -237,7 +246,7 @@ export default function Records() {
               ) : records.length === 0 ? (
                 <tr>
                   <td className="px-6 py-4 text-gray-700 text-center" colSpan="7">
-                    No records found
+                    {t('noRecordsFound')}
                   </td>
                 </tr>
               ) : (
@@ -248,7 +257,7 @@ export default function Records() {
                     </td>
                     {activeTab === 'all' && (
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 capitalize">
-                        {record.type}
+                        {t(record.type)}
                       </td>
                     )}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
@@ -291,7 +300,7 @@ export default function Records() {
           <div className="flex-1 flex justify-between items-center">
             <div>
               <p className="text-sm text-gray-700">
-                Page {currentPage + 1} of {totalPages}
+                {t('page')} {currentPage + 1} {t('of')} {totalPages}
               </p>
             </div>
             <div className="flex gap-2">
@@ -304,7 +313,7 @@ export default function Records() {
                     : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                Previous
+                {t('previous')}
               </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
@@ -315,7 +324,7 @@ export default function Records() {
                     : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                Next
+                {t('next')}
               </button>
             </div>
           </div>

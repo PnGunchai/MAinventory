@@ -2,9 +2,12 @@
 
 import { useState } from 'react';
 import Navigation from './Navigation';
+import { useTranslation } from 'react-i18next';
+import '../utils/i18n'
 
 export default function ClientNav({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -19,7 +22,7 @@ export default function ClientNav({ children }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <span className="font-bold text-lg text-gray-900">Stock Manager</span>
+        <span className="font-bold text-lg text-gray-900">{t('stockManager')}</span>
         <div className="w-6" /> {/* Spacer for symmetry */}
       </div>
 

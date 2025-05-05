@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { orderApi } from '../services/api';
+import { useTranslation } from 'react-i18next';
 
 export default function AddItemsModal({ isOpen, onClose, orderId, onItemsAdded }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -87,7 +89,7 @@ export default function AddItemsModal({ isOpen, onClose, orderId, onItemsAdded }
       ];
 
       if (products.length === 0) {
-        setError('Please add at least one item');
+        setError(t('pleaseAddAtLeastOneItem'));
         return;
       }
 
@@ -95,7 +97,7 @@ export default function AddItemsModal({ isOpen, onClose, orderId, onItemsAdded }
       if (onItemsAdded) onItemsAdded();
       onClose();
     } catch (err) {
-      setError(err.message || 'Failed to add items');
+      setError(err.message || t('failedToAddItems'));
     } finally {
       setLoading(false);
     }
@@ -107,7 +109,7 @@ export default function AddItemsModal({ isOpen, onClose, orderId, onItemsAdded }
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
       <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-lg bg-white">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Add Items</h2>
+          <h2 className="text-xl font-bold text-gray-900">{t('addItems')}</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -125,12 +127,12 @@ export default function AddItemsModal({ isOpen, onClose, orderId, onItemsAdded }
         {/* Non-serialized Items Section */}
         <div className="border-t pt-4">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-medium text-gray-900">Non-serialized Items</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('nonSerializedItems')}</h3>
             <button
               onClick={() => setNonSerializedItems([])}
               className="text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
-              Remove Section
+              {t('removeSection')}
             </button>
           </div>
           {nonSerializedItems.map((item, index) => (
@@ -141,7 +143,7 @@ export default function AddItemsModal({ isOpen, onClose, orderId, onItemsAdded }
                   value={item.boxBarcode}
                   onChange={(e) => handleNonSerializedChange(index, 'boxBarcode', e.target.value)}
                   className="w-full rounded-lg border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900"
-                  placeholder="Box Barcode"
+                  placeholder={t('boxBarcode')}
                 />
               </div>
               <div className="w-24">
@@ -165,19 +167,19 @@ export default function AddItemsModal({ isOpen, onClose, orderId, onItemsAdded }
             onClick={handleAddNonSerializedItem}
             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
           >
-            + Add Item
+            {t('addItem')}
           </button>
         </div>
 
         {/* Serialized Items Section */}
         <div className="border-t pt-4 mt-4">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-medium text-gray-900">Serialized Items</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('serializedItems')}</h3>
             <button
               onClick={() => setSerializedGroups([])}
               className="text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
-              Remove Section
+              {t('removeSection')}
             </button>
           </div>
           {serializedGroups.map((group, groupIndex) => (
@@ -185,14 +187,14 @@ export default function AddItemsModal({ isOpen, onClose, orderId, onItemsAdded }
               <div className="flex gap-4 items-start">
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Box Barcode
+                    {t('boxBarcode')}
                   </label>
                   <input
                     type="text"
                     value={group.boxBarcode}
                     onChange={(e) => handleSerializedChange(groupIndex, 'boxBarcode', e.target.value)}
                     className="w-full rounded-lg border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900"
-                    placeholder="Box Barcode"
+                    placeholder={t('boxBarcode')}
                   />
                 </div>
                 <button

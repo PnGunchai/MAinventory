@@ -6,6 +6,7 @@ import NewOrderModal from './NewOrderModal';
 import NewBrokenOrderModal from './NewBrokenOrderModal';
 import EditOrderModal from '../../components/EditOrderModal';
 import AddItemsModal from '../../components/AddItemsModal';
+import { useTranslation } from 'react-i18next';
 
 // Debounce helper function
 function debounce(func, wait) {
@@ -21,6 +22,7 @@ function debounce(func, wait) {
 }
 
 export default function Orders() {
+  const { t, i18n } = useTranslation();
   const hasPermission = useAuthStore(state => state.hasPermission);
   const [activeTab, setActiveTab] = useState('sales');
   const [orders, setOrders] = useState([]);
@@ -59,6 +61,10 @@ export default function Orders() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddItemsModal, setShowAddItemsModal] = useState(false);
   const [selectedOrderForEdit, setSelectedOrderForEdit] = useState(null);
+
+  // Add mounted state to ensure client-only rendering for permission-based UI
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // Initialize item destinations when items are loaded
   useEffect(() => {
@@ -184,7 +190,7 @@ export default function Orders() {
       // Check if sales order ID is provided when needed
       const hasSalesItems = Object.values(itemDestinations).some(dest => dest === 'sales');
       if (hasSalesItems && !newSalesOrderId.trim()) {
-        throw new Error('Please enter an invoice number for items marked for sales');
+        throw new Error(t('pleaseEnterInvoiceNumberForSales'));
       }
 
       // Validate all items have destinations and quantities where needed
@@ -194,7 +200,7 @@ export default function Orders() {
           const destination = itemDestinations[identifier];
 
           if (!destination) {
-            throw new Error(`Please select a destination for ${item.productName} (${identifier})`);
+            throw new Error(t('pleaseSelectDestinationFor', { productName: item.productName }));
           }
 
           if (destination === 'sales') {
@@ -202,10 +208,10 @@ export default function Orders() {
               // For non-serialized products, validate and use quantity
               const salesQty = salesQuantities[item.boxBarcode];
               if (!salesQty || salesQty <= 0) {
-                throw new Error(`Please specify a valid quantity for ${item.productName}`);
+                throw new Error(t('pleaseSpecifyValidQuantityFor', { productName: item.productName }));
               }
               if (salesQty > item.quantity) {
-                throw new Error(`Sales quantity cannot exceed available quantity (${item.quantity}) for ${item.productName}`);
+                throw new Error(t('salesQuantityCannotExceedAvailableQuantity', { quantity: item.quantity, productName: item.productName }));
               }
               moveToSales.push(`${item.boxBarcode}:${salesQty}`);
               
@@ -238,7 +244,7 @@ export default function Orders() {
 
       // Validate that at least one item is being processed
       if (moveToSales.length === 0 && returnToStock.length === 0 && markAsBroken.length === 0) {
-        throw new Error('Please select a destination for at least one item');
+        throw new Error(t('pleaseSelectDestinationForAtLeastOneItem'));
       }
 
       // Create request body
@@ -261,10 +267,10 @@ export default function Orders() {
 
       // Close modal and refresh
       handleProcessModalClose(true);
-      setProcessingError('Items processed successfully');
+      setProcessingError(t('itemsProcessedSuccessfully'));
     } catch (error) {
       console.error('Error processing items:', error);
-      setProcessingError(error.message || 'Failed to process items');
+      setProcessingError(error.message || t('failedToProcessItems'));
     }
   };
 
@@ -298,7 +304,7 @@ export default function Orders() {
       setTotalElements(response.totalElements);
     } catch (err) {
       console.error('Error fetching orders:', err);
-      setError(err.message || 'Failed to fetch orders');
+      setError(err.message || t('failedToFetchOrders'));
       setOrders([]);
       setTotalPages(0);
       setTotalElements(0);
@@ -360,7 +366,7 @@ export default function Orders() {
       setViewOrderItems(items);
     } catch (error) {
       console.error('Error fetching order items:', error);
-      setViewOrderError(error.message || 'Failed to fetch order items');
+      setViewOrderError(error.message || t('failedToFetchOrderItems'));
       setViewOrderItems([]);
     } finally {
       setViewOrderLoading(false);
@@ -400,16 +406,21 @@ export default function Orders() {
     refreshOrders();
   };
 
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'th' : 'en';
+    i18n.changeLanguage(newLang);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-black">Orders</h1>
-        {hasPermission('canCreateOrder') && (
+        <h1 className="text-3xl font-bold text-black">{t('orders')}</h1>
+        {mounted && hasPermission('canCreateOrder') && (
           <button 
             onClick={() => setShowNewOrderModal(true)}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Create Order
+            {t('createOrder')}
           </button>
         )}
       </div>
@@ -444,7 +455,7 @@ export default function Orders() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
             >
-              Sales Orders
+              {t('salesOrders')}
             </button>
             <button 
               onClick={() => setActiveTab('lent')}
@@ -454,7 +465,7 @@ export default function Orders() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
             >
-              Lent Orders
+              {t('lentOrders')}
             </button>
           </nav>
         </div>
@@ -467,7 +478,7 @@ export default function Orders() {
               <div className="flex-1">
                 <input
                   type="text"
-                  placeholder="Search by Order ID, Employee ID, Shop Name..."
+                  placeholder={t('searchByOrderIdEmployeeIdShopName')}
                   value={searchTerm}
                   onChange={handleSearch}
                   className="w-full rounded-lg border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900 placeholder-gray-400"
@@ -487,7 +498,7 @@ export default function Orders() {
                     }}
                     className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   >
-                    {activeTab === 'sales' ? 'Invoice Number' : 'Lent ID'}
+                    {activeTab === 'sales' ? t('invoiceNumber') : t('lentId')}
                     {sortField === (activeTab === 'sales' ? 'invoice' : 'lentId') && (
                       <span className="ml-2">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}
@@ -499,7 +510,7 @@ export default function Orders() {
                     }}
                     className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   >
-                    Date
+                    {t('date')}
                     {sortField === 'timestamp' && (
                       <span className="ml-2">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}
@@ -511,7 +522,7 @@ export default function Orders() {
                     }}
                     className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   >
-                    Shop Name
+                    {t('shopName')}
                     {sortField === 'shopName' && (
                       <span className="ml-2">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}
@@ -523,7 +534,7 @@ export default function Orders() {
                     }}
                     className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   >
-                    Employee ID
+                    {t('employeeId')}
                     {sortField === 'employeeId' && (
                       <span className="ml-2">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}
@@ -536,14 +547,14 @@ export default function Orders() {
                       }}
                       className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     >
-                      Status
+                      {t('status')}
                       {sortField === 'status' && (
                         <span className="ml-2">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                       )}
                     </th>
                   )}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    {t('actions')}
                   </th>
                 </tr>
               </thead>
@@ -551,7 +562,7 @@ export default function Orders() {
                 {loading ? (
                   <tr>
                     <td className="px-6 py-4 text-gray-700 text-center" colSpan={activeTab === 'lent' ? 6 : 5}>
-                      Loading...
+                      {t('loading')}
                     </td>
                   </tr>
                 ) : error ? (
@@ -563,7 +574,7 @@ export default function Orders() {
                 ) : orders.length === 0 ? (
                   <tr>
                     <td className="px-6 py-4 text-gray-700 text-center" colSpan={activeTab === 'lent' ? 6 : 5}>
-                      No {activeTab} orders found
+                      {t('noOrdersFound')}
                     </td>
                   </tr>
                 ) : orders.map((order) => (
@@ -594,7 +605,7 @@ export default function Orders() {
                               ? 'bg-yellow-100 text-yellow-800' 
                               : 'bg-green-100 text-green-800'
                           }`}>
-                            {order.status === 'active' ? 'Active' : 'Completed'}
+                            {order.status === 'active' ? t('active') : t('completed')}
                           </span>
                         </td>
                       )}
@@ -604,22 +615,22 @@ export default function Orders() {
                             onClick={() => handleViewClick(order)}
                             className="text-blue-600 hover:text-blue-900"
                           >
-                            View
+                            {t('view')}
                           </button>
-                          {hasPermission('canCreateOrder') && activeTab === 'sales' && (
+                          {mounted && hasPermission('canCreateOrder') && activeTab === 'sales' && (
                             <button
                               onClick={() => handleEditClick(order)}
                               className="text-green-600 hover:text-green-900"
                             >
-                              Edit
+                              {t('edit')}
                             </button>
                           )}
-                          {hasPermission('canCreateOrder') && activeTab === 'lent' && order.status === 'active' && (
+                          {mounted && hasPermission('canCreateOrder') && activeTab === 'lent' && order.status === 'active' && (
                             <button
                               onClick={() => handleProcessClick(order)}
                               className="text-yellow-600 hover:text-yellow-900"
                             >
-                              Process
+                              {t('process')}
                             </button>
                           )}
                         </div>
@@ -635,7 +646,7 @@ export default function Orders() {
             <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200">
               <div className="flex-1 flex justify-between items-center">
                 <p className="text-sm text-gray-700">
-                  Showing page {currentPage + 1} of {totalPages} ({totalElements} total orders)
+                  {t('showingPage')} {currentPage + 1} {t('of')} {totalPages} ({totalElements} {t('totalOrders')})
                 </p>
                 <div className="space-x-2">
                   <button
@@ -647,7 +658,7 @@ export default function Orders() {
                         : 'bg-white text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    Previous
+                    {t('previous')}
                   </button>
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
@@ -658,7 +669,7 @@ export default function Orders() {
                         : 'bg-white text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    Next
+                    {t('next')}
                   </button>
                 </div>
               </div>
@@ -672,7 +683,7 @@ export default function Orders() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl border border-gray-300">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-medium text-gray-900">Process Lent Order</h3>
+              <h3 className="text-lg font-medium text-gray-900">{t('processLentOrder')}</h3>
               <button
                 onClick={() => handleProcessModalClose(false)}
                 className="text-gray-900 hover:text-gray-700"
@@ -691,11 +702,11 @@ export default function Orders() {
               )}
 
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-300 mb-4">
-                <h4 className="font-medium mb-2 text-gray-900">Order Details</h4>
-                <p className="text-gray-900">Lent ID: {selectedOrder.orderId}</p>
-                <p className="text-gray-900">Shop: {selectedOrder.shopName}</p>
-                <p className="text-gray-900">Employee: {selectedOrder.employeeId}</p>
-                <p className="text-gray-900">Active Items: {processingItems.filter(item => item.status === 'lent').length}</p>
+                <h4 className="font-medium mb-2 text-gray-900">{t('orderDetails')}</h4>
+                <p className="text-gray-900">{t('lentId')}: {selectedOrder.orderId}</p>
+                <p className="text-gray-900">{t('shop')}: {selectedOrder.shopName}</p>
+                <p className="text-gray-900">{t('employee')}: {selectedOrder.employeeId}</p>
+                <p className="text-gray-900">{t('activeItems')}: {processingItems.filter(item => item.status === 'lent').length}</p>
               </div>
 
               {/* Info alert about automatic returns */}
@@ -704,7 +715,7 @@ export default function Orders() {
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
-                  For non-serialized products, specify the quantity to sell. Any remaining quantity will be automatically returned to stock.
+                  {t('infoAboutAutomaticReturns')}
                 </p>
               </div>
 
@@ -712,7 +723,7 @@ export default function Orders() {
               {Object.values(itemDestinations).some(dest => dest === 'sales') && (
                 <div className="bg-white border border-gray-300 p-4 rounded-md mb-4">
                   <label htmlFor="salesOrderId" className="block text-sm font-medium text-gray-700 mb-2">
-                    Sales Order ID (Invoice Number)
+                    {t('salesOrderId')}
                   </label>
                   <input
                     type="text"
@@ -720,7 +731,7 @@ export default function Orders() {
                     value={newSalesOrderId}
                     onChange={(e) => setNewSalesOrderId(e.target.value)}
                     className="w-full px-3 py-2 border-2 border-gray-700 bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-700 text-gray-900"
-                    placeholder="Enter invoice number for sales"
+                    placeholder={t('enterInvoiceNumberForSales')}
                     required
                   />
                 </div>
@@ -731,19 +742,19 @@ export default function Orders() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Product
+                        {t('product')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Box Number
+                        {t('boxNumber')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Quantity
+                        {t('quantity')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
+                        {t('status')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Action
+                        {t('action')}
                       </th>
                     </tr>
                   </thead>
@@ -778,7 +789,7 @@ export default function Orders() {
                                 <div>
                                   <div className="flex items-center space-x-2 mb-2">
                                     <label className="text-sm font-medium text-gray-700">
-                                      Move to Sales:
+                                      {t('moveToSales')}
                                     </label>
                                     <input
                                       type="number"
@@ -802,7 +813,7 @@ export default function Orders() {
                                     </p>
                                   ) : (
                                     <p className="text-sm text-gray-500">
-                                      All items will be returned to stock
+                                      {t('allItemsWillBeReturnedToStock')}
                                     </p>
                                   )}
                                 </div>
@@ -817,7 +828,7 @@ export default function Orders() {
                                     className="form-checkbox h-5 w-5 text-blue-600"
                                   />
                                   <label htmlFor={`moveToSales-${item.productBarcode}`} className="text-sm text-gray-700">
-                                    Move to Sales
+                                    {t('moveToSales')}
                                   </label>
                                 </div>
                               )}
@@ -835,14 +846,14 @@ export default function Orders() {
                   onClick={() => handleProcessModalClose(false)}
                   className="bg-white text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md border"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   onClick={handleProcessItems}
                   disabled={!processingItems.some(item => item.status === 'lent')}
                   className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Process Items
+                  {t('processItems')}
                 </button>
               </div>
             </div>
@@ -855,7 +866,7 @@ export default function Orders() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl border border-gray-300">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-medium text-gray-900">{activeTab === 'sales' ? 'Sales' : 'Lent'} Order Details</h3>
+              <h3 className="text-lg font-medium text-gray-900">{activeTab === 'sales' ? t('salesOrderDetails') : t('lentOrderDetails')}</h3>
               <button
                 onClick={handleViewModalClose}
                 className="text-gray-900 hover:text-gray-700"
@@ -872,11 +883,11 @@ export default function Orders() {
               )}
 
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-300 mb-4">
-                <h4 className="font-medium mb-2 text-gray-900">Order Details</h4>
-                <p className="text-gray-900">Order ID: {viewOrder.orderId}</p>
-                <p className="text-gray-900">Shop: {viewOrder.shopName}</p>
-                <p className="text-gray-900">Employee: {viewOrder.employeeId}</p>
-                <p className="text-gray-900">Date: {new Date(viewOrder.timestamp).toLocaleString('th-TH', {
+                <h4 className="font-medium mb-2 text-gray-900">{t('orderDetails')}</h4>
+                <p className="text-gray-900">{t('orderId')}: {viewOrder.orderId}</p>
+                <p className="text-gray-900">{t('shop')}: {viewOrder.shopName}</p>
+                <p className="text-gray-900">{t('employee')}: {viewOrder.employeeId}</p>
+                <p className="text-gray-900">{t('date')}: {new Date(viewOrder.timestamp).toLocaleString('th-TH', {
                   year: 'numeric',
                   month: '2-digit',
                   day: '2-digit',
@@ -885,20 +896,20 @@ export default function Orders() {
                   hour12: false
                 })}</p>
                 {activeTab === 'lent' && (
-                  <p className="text-gray-900">Status: {viewOrder.status}</p>
+                  <p className="text-gray-900">{t('status')}: {t(viewOrder.status)}</p>
                 )}
                 {viewOrder.note && (
                   <div className="mt-2">
-                    <p className="font-medium text-gray-900">Notes:</p>
+                    <p className="font-medium text-gray-900">{t('notes')}:</p>
                     <p className="text-gray-700 whitespace-pre-wrap">{viewOrder.note}</p>
                   </div>
                 )}
                 {activeTab === 'sales' && viewOrder.editCount > 0 && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <div className="flex items-center mb-2">
-                      <p className="font-medium text-gray-900">Edit History</p>
+                      <p className="font-medium text-gray-900">{t('editHistory')}</p>
                       <span className="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                        {viewOrder.editCount} {viewOrder.editCount === 1 ? 'edit' : 'edits'}
+                        {viewOrder.editCount} {viewOrder.editCount === 1 ? t('edit') : t('edits')}
                       </span>
                     </div>
                     <div className="bg-gray-50 p-3 rounded-md max-h-40 overflow-y-auto">
@@ -912,11 +923,11 @@ export default function Orders() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Product Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Product Number</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Quantity</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">{t('productName')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">{t('productNumber')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">{t('quantity')}</th>
                       {activeTab === 'lent' && (
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">{t('status')}</th>
                       )}
                     </tr>
                   </thead>
@@ -924,13 +935,13 @@ export default function Orders() {
                     {viewOrderLoading ? (
                       <tr>
                         <td colSpan={activeTab === 'lent' ? 4 : 3} className="px-6 py-4 text-gray-700 text-center">
-                          Loading items...
+                          {t('loadingItems')}
                         </td>
                       </tr>
                     ) : viewOrderItems.length === 0 ? (
                       <tr>
                         <td colSpan={activeTab === 'lent' ? 4 : 3} className="px-6 py-4 text-gray-700 text-center">
-                          No items found
+                          {t('noItemsFound')}
                         </td>
                       </tr>
                     ) : (
@@ -949,7 +960,7 @@ export default function Orders() {
                           </td>
                           {activeTab === 'lent' && (
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                              {item.status || '-'}
+                              {t(item.status) || '-'}
                             </td>
                           )}
                         </tr>
@@ -964,7 +975,7 @@ export default function Orders() {
                   onClick={handleViewModalClose}
                   className="bg-white text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md border"
                 >
-                  Close
+                  {t('close')}
                 </button>
               </div>
             </div>

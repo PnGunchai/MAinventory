@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { orderApi } from '../services/api';
 import AddItemsModal from './AddItemsModal';
+import { useTranslation } from 'react-i18next';
 
 export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated }) {
+  const { t } = useTranslation();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,7 +33,7 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
       const items = await orderApi.getSalesOrderItems(order.orderId);
       setItems(items);
     } catch (err) {
-      setError('Failed to fetch order items');
+      setError(t('failedToFetchOrderItems'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -60,7 +62,7 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
       fetchOrderItems();
       if (onOrderUpdated) onOrderUpdated();
     } catch (err) {
-      setError('Failed to remove item');
+      setError(t('failedToRemoveItem'));
       console.error(err);
     } finally {
       setDeleteConfirmation({
@@ -90,7 +92,7 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
       setNewNote('');
       if (onOrderUpdated) onOrderUpdated();
     } catch (err) {
-      setError('Failed to update notes');
+      setError(t('failedToUpdateNotes'));
       console.error(err);
     }
   };
@@ -111,7 +113,7 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
       <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-lg bg-white">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Edit Order #{order.orderId}</h2>
+          <h2 className="text-xl font-bold text-gray-900">{t('editOrder')} #{order.orderId}</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -128,30 +130,30 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
 
         <div className="border-t pt-4">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-medium text-gray-900">Items</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('items')}</h3>
             <button
               onClick={handleAddItemsClick}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
-              Add Items
+              {t('addItems')}
             </button>
           </div>
 
           {loading ? (
-            <div className="text-center py-4 text-gray-600">Loading...</div>
+            <div className="text-center py-4 text-gray-600">{t('loading')}</div>
           ) : (
             <div className="bg-white border rounded-lg overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Product
+                      {t('product')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Quantity/Serial
+                      {t('quantitySerial')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
+                      {t('actions')}
                     </th>
                   </tr>
                 </thead>
@@ -162,7 +164,7 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
                         {item.productName}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-gray-900">
-                        {item.productBarcode ? item.productBarcode : `${item.quantity} units`}
+                        {item.productBarcode ? item.productBarcode : `${item.quantity} ${t('units')}`}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
@@ -181,26 +183,26 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
         </div>
 
         <div className="border-t pt-4 mt-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Notes</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('notes')}</h3>
           <textarea
             value={newNote}
             onChange={(e) => setNewNote(e.target.value)}
             className="w-full rounded-lg border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900 h-20"
-            placeholder="Add a new note to append..."
+            placeholder={t('addNewNote')}
           />
           <div className="flex justify-end space-x-3 pt-4">
             <button
               onClick={onClose}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               onClick={handleUpdateNotes}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               disabled={!newNote.trim()}
             >
-              Add Note
+              {t('addNote')}
             </button>
           </div>
         </div>
@@ -223,25 +225,25 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Confirm Delete
+                {t('confirmDelete')}
               </h3>
               <p className="text-sm text-gray-500 mb-4">
-                Are you sure you want to remove "{deleteConfirmation.productName}" from this order?
-                {!deleteConfirmation.productBarcode && ` (${deleteConfirmation.quantity} units)`}
-                This action cannot be undone.
+                {t('confirmDeleteMessage', { productName: deleteConfirmation.productName, quantity: deleteConfirmation.quantity })}
+                {deleteConfirmation.productBarcode && ` (${deleteConfirmation.productBarcode})`}
+                {t('confirmDeleteWarning')}
               </p>
               <div className="flex justify-end space-x-4">
                 <button
                   onClick={handleDeleteCancel}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   onClick={handleDeleteConfirm}
                   className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md"
                 >
-                  Delete
+                  {t('delete')}
                 </button>
               </div>
             </div>

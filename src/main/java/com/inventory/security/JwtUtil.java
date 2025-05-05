@@ -17,7 +17,7 @@ import java.util.function.Function;
 public class JwtUtil {
 
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60; // 5 hours
+    private static final long JWT_TOKEN_VALIDITY = 8 * 60 * 60; // 8 hours
 
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();

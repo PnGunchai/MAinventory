@@ -1,11 +1,9 @@
 import React from 'react';
-import { LentOrderStatus } from '../types/lent';
+import { useTranslation } from 'react-i18next';
+import PropTypes from 'prop-types';
 
-interface LentOrderStatusBadgeProps {
-    status: LentOrderStatus;
-}
-
-export const LentOrderStatusBadge: React.FC<LentOrderStatusBadgeProps> = ({ status }) => {
+export const LentOrderStatusBadge = ({ status }) => {
+    const { t } = useTranslation();
     const getStatusColor = () => {
         switch (status) {
             case 'active':
@@ -19,7 +17,11 @@ export const LentOrderStatusBadge: React.FC<LentOrderStatusBadgeProps> = ({ stat
 
     return (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor()}`}>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
+            {t(status)}
         </span>
     );
+};
+
+LentOrderStatusBadge.propTypes = {
+    status: PropTypes.string.isRequired,
 }; 

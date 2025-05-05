@@ -71,8 +71,8 @@ public class SecurityConfig {
             "http://localhost:3000",
             "https://mainventory.vercel.app",
             "https://*.vercel.app",
-            "https://mainventory.onrender.com",
-            "https://mainventory-production.up.railway.app"
+            "https://mainventory-production.up.railway.app",
+            "https://mainventory-production.up.railway.app/api"
         )); 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList(

@@ -4,8 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { productApi } from '@/services/api';
 import { debounce } from 'lodash';
 import { useAuthStore } from '@/store/authStore';
+import { useTranslation } from 'react-i18next';
 
 export default function Stock() {
+  const { i18n, t } = useTranslation();
   const hasPermission = useAuthStore(state => state.hasPermission);
   
   // State for showing/hiding add/remove pages
@@ -303,10 +305,15 @@ export default function Stock() {
     </div>
   );
 
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'th' : 'en';
+    i18n.changeLanguage(newLang);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-black">Current Stock</h1>
+        <h1 className="text-3xl font-bold text-black">{t('currentStock')}</h1>
         {hasPermission('canAddStock') && (
           <div className="space-x-4">
             <button
@@ -317,7 +324,7 @@ export default function Stock() {
               }}
               className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
             >
-              Add (+)
+              {t('add')} (+)
             </button>
             <button
               onClick={() => {
@@ -327,7 +334,7 @@ export default function Stock() {
               }}
               className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
             >
-              Remove (-)
+              {t('remove')} (-)
             </button>
           </div>
         )}
@@ -337,7 +344,7 @@ export default function Stock() {
       <div className="bg-white shadow rounded-lg p-4">
         <input
           type="text"
-          placeholder="Search by product name..."
+          placeholder={t('searchByProductName')}
           value={searchTerm}
           onChange={handleSearch}
           className="w-full rounded-lg border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900 placeholder-gray-400"
@@ -353,7 +360,7 @@ export default function Stock() {
             <div className="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold text-black">Add Stock (+)</h2>
+                  <h2 className="text-xl font-semibold text-black">{t('addStock')}</h2>
                   <button
                     onClick={() => {
                       setShowAddPage(false);
@@ -373,7 +380,7 @@ export default function Stock() {
 
                 <form onSubmit={handleAddStock}>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Box Barcode</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('boxBarcode')}</label>
                     <input
                       type="text"
                       name="boxBarcode"
@@ -384,7 +391,7 @@ export default function Stock() {
                     />
                     {productDetails[addFormData.boxBarcode] && (
                       <div className="mt-1 text-sm text-gray-600">
-                        Product: {productDetails[addFormData.boxBarcode].productName}
+                        {t('product')}: {productDetails[addFormData.boxBarcode].productName}
                         <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium" style={{
                           backgroundColor: productDetails[addFormData.boxBarcode].numberSn === 2 ? '#EDE9FE' : productDetails[addFormData.boxBarcode].numberSn === 1 ? '#E0F2FE' : '#F3F4F6',
                           color: productDetails[addFormData.boxBarcode].numberSn === 2 ? '#5B21B6' : productDetails[addFormData.boxBarcode].numberSn === 1 ? '#0369A1' : '#374151'
@@ -397,7 +404,7 @@ export default function Stock() {
 
                   {/* Product Barcodes Section */}
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Product Barcodes</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('productBarcodes')}</label>
                     {addFormData.productBarcodes.map((barcode, index) => (
                       <div key={index} className="flex gap-2 mb-2">
                         <input
@@ -408,7 +415,7 @@ export default function Stock() {
                             newBarcodes[index] = e.target.value;
                             setAddFormData({ ...addFormData, productBarcodes: newBarcodes });
                           }}
-                          placeholder={`Product Barcode ${index + 1}`}
+                          placeholder={`${t('productBarcode')} ${index + 1}`}
                           className="flex-1 px-3 py-2 rounded-lg border-2 border-gray-300 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                         />
                         {index > 0 && (
@@ -427,12 +434,12 @@ export default function Stock() {
                       onClick={addProductBarcodeField}
                       className="mt-2 text-sm text-blue-600 hover:text-blue-800"
                     >
-                      + Add More Items
+                      + {t('addMoreItems')}
                     </button>
                   </div>
 
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('quantity')}</label>
                     <input
                       type="number"
                       name="quantity"
@@ -445,7 +452,7 @@ export default function Stock() {
                   </div>
 
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Note (optional)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('note')} (optional)</label>
                     <input
                       type="text"
                       name="note"
@@ -465,14 +472,14 @@ export default function Stock() {
                       className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                       disabled={addProcessing}
                     >
-                      Cancel
+                      {t('cancel')}
                     </button>
                     <button
                       type="submit"
                       className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
                       disabled={addProcessing}
                     >
-                      {addProcessing ? 'Adding...' : 'Add Stock'}
+                      {addProcessing ? t('adding') : t('addStock')}
                     </button>
                   </div>
                 </form>
@@ -491,7 +498,7 @@ export default function Stock() {
             <div className="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold text-black">Remove Stock (-)</h2>
+                  <h2 className="text-xl font-semibold text-black">{t('removeStock')}</h2>
                   <button
                     onClick={() => {
                       setShowRemovePage(false);
@@ -511,7 +518,7 @@ export default function Stock() {
 
                 <form onSubmit={handleRemoveStock}>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Box Barcode</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('boxBarcode')}</label>
                     <input
                       type="text"
                       name="boxBarcode"
@@ -522,7 +529,7 @@ export default function Stock() {
                     />
                     {productDetails[removeFormData.boxBarcode] && (
                       <div className="mt-1 text-sm text-gray-600">
-                        Product: {productDetails[removeFormData.boxBarcode].productName}
+                        {t('product')}: {productDetails[removeFormData.boxBarcode].productName}
                         <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium" style={{
                           backgroundColor: productDetails[removeFormData.boxBarcode].numberSn === 2 ? '#EDE9FE' : productDetails[removeFormData.boxBarcode].numberSn === 1 ? '#E0F2FE' : '#F3F4F6',
                           color: productDetails[removeFormData.boxBarcode].numberSn === 2 ? '#5B21B6' : productDetails[removeFormData.boxBarcode].numberSn === 1 ? '#0369A1' : '#374151'
@@ -535,7 +542,7 @@ export default function Stock() {
 
                   {/* Product Barcodes Section */}
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Product Barcodes</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('productBarcodes')}</label>
                     {removeFormData.productBarcodes.map((barcode, index) => (
                       <div key={index} className="flex gap-2 mb-2">
                         <input
@@ -546,7 +553,7 @@ export default function Stock() {
                             newBarcodes[index] = e.target.value;
                             setRemoveFormData({ ...removeFormData, productBarcodes: newBarcodes });
                           }}
-                          placeholder={`Product Barcode ${index + 1}`}
+                          placeholder={`${t('productBarcode')} ${index + 1}`}
                           className="flex-1 px-3 py-2 rounded-lg border-2 border-gray-300 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                         />
                         {index > 0 && (
@@ -565,12 +572,12 @@ export default function Stock() {
                       onClick={addRemoveProductBarcodeField}
                       className="mt-2 text-sm text-blue-600 hover:text-blue-800"
                     >
-                      + Add More Items
+                      + {t('addMoreItems')}
                     </button>
                   </div>
 
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('quantity')}</label>
                     <input
                       type="number"
                       name="quantity"
@@ -583,7 +590,7 @@ export default function Stock() {
                   </div>
 
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Note (optional)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('note')} (optional)</label>
                     <input
                       type="text"
                       name="note"
@@ -603,14 +610,14 @@ export default function Stock() {
                       className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                       disabled={removeProcessing}
                     >
-                      Cancel
+                      {t('cancel')}
                     </button>
                     <button
                       type="submit"
                       className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
                       disabled={removeProcessing}
                     >
-                      {removeProcessing ? 'Removing...' : 'Remove Stock'}
+                      {removeProcessing ? t('removing') : t('removeStock')}
                     </button>
                   </div>
                 </form>
@@ -627,17 +634,17 @@ export default function Stock() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                  Product Name
+                  {t('productName')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                  SN Type
+                  {t('snType')}
                 </th>
                 <th 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('totalQuantity')}
                 >
                   <div className="flex items-center justify-between">
-                    <span>Quantity</span>
+                    <span>{t('quantity')}</span>
                     <span className={`transform transition-all duration-200 ${sortConfig.key === 'totalQuantity' ? 'opacity-100' : 'opacity-50'}`}>
                       {getSortIndicator('totalQuantity')}
                     </span>
@@ -648,7 +655,7 @@ export default function Stock() {
                   onClick={() => handleSort('lastUpdated')}
                 >
                   <div className="flex items-center justify-between">
-                    <span>Last Updated</span>
+                    <span>{t('lastUpdated')}</span>
                     <span className={`transform transition-all duration-200 ${sortConfig.key === 'lastUpdated' ? 'opacity-100' : 'opacity-50'}`}>
                       {getSortIndicator('lastUpdated')}
                     </span>
@@ -660,19 +667,19 @@ export default function Stock() {
               {loading ? (
                 <tr>
                   <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
-                    Loading...
+                    {t('loading')}
                   </td>
                 </tr>
               ) : error ? (
                 <tr>
                   <td colSpan="4" className="px-6 py-4 text-center text-red-600">
-                    Error: {error}
+                    {t('error')}: {error}
                   </td>
                 </tr>
               ) : sortedAndFilteredData.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
-                    No products found
+                    {t('noProductsFound')}
                   </td>
                 </tr>
               ) : (

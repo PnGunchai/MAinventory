@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 import { checkPermission } from '@/utils/permissions';
 
-const API_URL = `${process.env.NEXT_PUBLIC_API_URL || 'https://mainventory.onrender.com/api'}/auth`;
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL || 'mainventory-production.up.railway.app/api'}/auth`;
 
 // Helper function to get user from cookie
 const getUserFromCookie = () => {
