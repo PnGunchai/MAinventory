@@ -11,16 +11,21 @@ async function apiCall(endpoint, options = {}) {
         const url = `${API_BASE_URL}${cleanEndpoint.startsWith('/') ? cleanEndpoint : '/' + cleanEndpoint}`;
         console.log(`Making API call to ${url}`, options); // Debug log
 
-        // Get token from cookies
-        const token = Cookies.get('token');
-        
+        // Get token from cookies or localStorage (for production reliability)
+        let token = Cookies.get('token');
+        if (!token && typeof window !== 'undefined') {
+            token = window.localStorage.getItem('token') || window.sessionStorage.getItem('token');
+        }
+        // Always send Authorization header if token is found
+        const authHeader = token ? { 'Authorization': `Bearer ${token}` } : {};
+
         const response = await fetch(url, {
             ...options,
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'Origin': window.location.origin,
-                ...(token && { 'Authorization': `Bearer ${token}` }),
+                ...authHeader,
                 ...options.headers,
             },
             credentials: 'include', // Include credentials for CORS
