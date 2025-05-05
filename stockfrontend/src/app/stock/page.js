@@ -53,18 +53,22 @@ export default function Stock() {
       setError(null);
       const data = await productApi.getCurrentStock();
       
-      // Fetch product details for each unique product name
+      // Fetch all products once
+      let products = [];
+      try {
+        const productsResponse = await productApi.getProducts();
+        products = productsResponse.data;
+      } catch (err) {
+        console.error('Error fetching all products:', err);
+      }
+
+      // Build details map
       const details = {};
       for (const item of data) {
         if (!details[item.productName]) {
-          try {
-            const products = await productApi.getProducts();
-            const product = products.data.find(p => p.productName === item.productName);
-            if (product) {
-              details[item.productName] = product;
-            }
-          } catch (err) {
-            console.error(`Error fetching details for ${item.productName}:`, err);
+          const product = products.find(p => p.productName === item.productName);
+          if (product) {
+            details[item.productName] = product;
           }
         }
       }
