@@ -456,6 +456,7 @@ export default function Catalog() {
             </h3>
             <p className="text-sm text-gray-500 mb-4">
               {t('confirmDeleteMessage', { productName: deleteConfirmation.productName, boxBarcode: deleteConfirmation.boxBarcode })}
+              <br />
               {t('confirmDeleteWarning')}
             </p>
             <div className="flex justify-end space-x-4">
