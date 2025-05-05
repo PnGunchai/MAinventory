@@ -8,7 +8,7 @@ RUN mvn package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/stockbackend-0.0.1-SNAPSHOT.jar app.jar
 
 # Creating a non-root user for better security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
