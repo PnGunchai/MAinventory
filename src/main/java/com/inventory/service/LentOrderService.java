@@ -425,7 +425,7 @@ public class LentOrderService {
     /**
      * Process items with split destinations
      */
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     private void processSplitDestinations(String orderId, LentItemBatchProcessDTO request) {
         logger.info("Processing split destinations for order ID: {}", orderId);
         
@@ -446,7 +446,7 @@ public class LentOrderService {
     /**
      * Process non-serialized product with split destinations
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     private void processNonSerializedSplitDestinations(String boxBarcode, Map<String, Integer> destinations, 
                                                      String orderId, LentItemBatchProcessDTO request) {
         // Find the lent record
@@ -580,7 +580,7 @@ public class LentOrderService {
     /**
      * Process items that should be returned to stock
      */
-    @Transactional(noRollbackFor = Exception.class)
+    @Transactional
     private void processReturnToStock(String orderId, LentItemBatchProcessDTO request) {
         if (request.getReturnToStock() == null || request.getReturnToStock().isEmpty()) {
             return;
@@ -633,7 +633,7 @@ public class LentOrderService {
     /**
      * Process return of a non-serialized product
      */
-    @Transactional(noRollbackFor = Exception.class)
+    @Transactional
     private void processNonSerializedReturn(String identifier, String orderId, LentItemBatchProcessDTO request) {
         logger.info("Processing non-serialized return for identifier: {}", identifier);
         
@@ -652,25 +652,27 @@ public class LentOrderService {
             throw new ResourceNotFoundException("Lent item not found with box barcode: " + boxBarcode);
         }
         
-        // Get the active lent record
-        Lend lentItem = lentItems.stream()
-                .filter(item -> item.getProductBarcode() == null && "lent".equals(item.getStatus()))
+        // Get the original lent record (the one with the initial quantity and not a split)
+        Lend originalLentItem = lentItems.stream()
+                .filter(item -> item.getProductBarcode() == null
+                    && ("lent".equals(item.getStatus()) || "processed".equals(item.getStatus()))
+                    && (item.getNote() == null || (!item.getNote().contains("Split return") && !item.getNote().contains("Split sale"))))
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Active lent item not found with box barcode: " + boxBarcode));
+                        "Original lent item not found with box barcode: " + boxBarcode + " and order ID: " + orderId));
 
         // Create return record
         Lend returnRecord = new Lend();
         returnRecord.setBoxBarcode(boxBarcode);
-        returnRecord.setProductName(lentItem.getProductName());
+        returnRecord.setProductName(originalLentItem.getProductName());
         returnRecord.setProductBarcode(null);
         returnRecord.setEmployeeId(request.getEmployeeId());
-        returnRecord.setShopName(lentItem.getShopName());
+        returnRecord.setShopName(originalLentItem.getShopName());
         returnRecord.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         returnRecord.setQuantity(returnQuantity);
         returnRecord.setOrderId(orderId);
         returnRecord.setStatus("returned");
-        returnRecord.setNote("Split return from original lent quantity: " + lentItem.getQuantity());
+        returnRecord.setNote("Split return from original lent quantity: " + originalLentItem.getQuantity());
         lendRepository.save(returnRecord);
 
         // Return items to stock with correct quantity
@@ -683,12 +685,12 @@ public class LentOrderService {
         );
 
         // Update the original lent record
-        lentItem.setStatus("processed");
-        lentItem.setQuantity(0);
-        lentItem.setNote(lentItem.getNote() != null ? 
-            lentItem.getNote() + " [Fully processed]" : 
+        originalLentItem.setStatus("processed");
+        originalLentItem.setQuantity(0);
+        originalLentItem.setNote(originalLentItem.getNote() != null ? 
+            originalLentItem.getNote() + " [Fully processed]" : 
             "Fully processed");
-        lendRepository.save(lentItem);
+        lendRepository.save(originalLentItem);
 
         // Update order status
         updateOrderStatus(orderId);
@@ -699,7 +701,7 @@ public class LentOrderService {
     /**
      * Process return of a serialized product
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = Exception.class)
+    @Transactional
     private void processSerializedReturn(String productBarcode, String orderId, LentItemBatchProcessDTO request, Set<String> processedBarcodes) {
         logger.info("Processing serialized return for product: {}", productBarcode);
         
@@ -739,7 +741,7 @@ public class LentOrderService {
     /**
      * Process items that should be moved to sales
      */
-    @Transactional(propagation = Propagation.REQUIRED, noRollbackFor = Exception.class)
+    @Transactional
     private void processMovingToSales(String orderId, LentItemBatchProcessDTO request) {
         // Validate shop name is provided for sales
         if (request.getShopName() == null || request.getShopName().trim().isEmpty()) {
@@ -785,7 +787,7 @@ public class LentOrderService {
     /**
      * Process sales of a non-serialized product
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = Exception.class)
+    @Transactional
     private void processNonSerializedSales(String identifier, String orderId, LentItemBatchProcessDTO request, String salesOrderId) {
         logger.info("Processing non-serialized sales for identifier: {}", identifier);
         
@@ -823,9 +825,11 @@ public class LentOrderService {
             throw new ResourceNotFoundException("Lent item not found with box barcode: " + boxBarcode + " and order ID: " + orderId);
         }
         
-        // Get the original lent record (the one with the initial quantity)
+        // Get the original lent record (the one with the initial quantity and not a split)
         Lend originalLentItem = lentItems.stream()
-                .filter(item -> item.getProductBarcode() == null)
+                .filter(item -> item.getProductBarcode() == null
+                    && ("lent".equals(item.getStatus()) || "processed".equals(item.getStatus()))
+                    && (item.getNote() == null || (!item.getNote().contains("Split return") && !item.getNote().contains("Split sale"))))
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Original lent item not found with box barcode: " + boxBarcode + " and order ID: " + orderId));
@@ -925,7 +929,7 @@ public class LentOrderService {
     /**
      * Process sales of a serialized product
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = Exception.class)
+    @Transactional
     private void processSerializedSales(String productBarcode, String orderId, LentItemBatchProcessDTO request, 
                                       String salesOrderId, Set<String> processedBarcodes) {
         // Find the lent record for this product
@@ -969,7 +973,7 @@ public class LentOrderService {
     /**
      * Process items that should be marked as broken
      */
-    @Transactional(noRollbackFor = Exception.class)
+    @Transactional
     private void processMarkingAsBroken(String orderId, LentItemBatchProcessDTO request) {
         // Validate condition is provided for broken items
         if (request.getCondition() == null || request.getCondition().trim().isEmpty()) {
@@ -1209,7 +1213,7 @@ public class LentOrderService {
     /**
      * Update lent record status directly using JDBC
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void updateLentStatus(String productBarcode, String orderId, String status) {
         if (orderId == null || orderId.isEmpty()) {
             logger.warn("Cannot update lent status: orderId is null or empty");

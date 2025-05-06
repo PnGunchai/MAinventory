@@ -70,6 +70,14 @@ public class LogsFilterService {
             spec = spec.and(SpecificationBuilder.dateBetween("timestamp", filter.getStartDate(), filter.getEndDate()));
         }
         
+        // Multi-field search if 'search' is provided
+        if (filter.getSearch() != null && !filter.getSearch().isEmpty()) {
+            spec = spec.and(SpecificationBuilder.multiFieldLike(
+                new String[]{"productName", "productBarcode", "operation", "orderId"},
+                filter.getSearch()
+            ));
+        }
+        
         return spec;
     }
 } 

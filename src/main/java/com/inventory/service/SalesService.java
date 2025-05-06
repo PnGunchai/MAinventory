@@ -40,7 +40,7 @@ public class SalesService extends BaseServiceImpl<Sales, Long, SalesRepository> 
      * Create a sales record
      * @param quantity For serialized products, should always be 1. For non-serialized products, can be any positive number.
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public Sales createSalesRecord(String boxBarcode, String productName, String productBarcode, 
                                   String employeeId, String shopName, String orderId, String note, 
                                   Integer boxNumber, Integer quantity) {
@@ -119,7 +119,7 @@ public class SalesService extends BaseServiceImpl<Sales, Long, SalesRepository> 
     /**
      * Get or create an invoice
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     private Invoice getOrCreateInvoice(String orderId, String employeeId, String shopName) {
         logger.info("getOrCreateInvoice: orderId={}, employeeId={}, shopName={}", orderId, employeeId, shopName);
         
@@ -169,7 +169,7 @@ public class SalesService extends BaseServiceImpl<Sales, Long, SalesRepository> 
     }
 
     // For serialized products (with boxNumber)
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public Sales createSalesRecord(String boxBarcode, String productName, String productBarcode, 
                                  String employeeId, String shopName, String orderId, String note,
                                  Integer boxNumber) {
@@ -179,7 +179,7 @@ public class SalesService extends BaseServiceImpl<Sales, Long, SalesRepository> 
     }
 
     // For legacy compatibility (no boxNumber)
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public Sales createSalesRecord(String boxBarcode, String productName, String productBarcode, 
                                  String employeeId, String shopName, String orderId, String note) {
         // For serialized products, quantity is always 1
@@ -190,7 +190,7 @@ public class SalesService extends BaseServiceImpl<Sales, Long, SalesRepository> 
     /**
      * Create sales record for non-serialized product with specified quantity
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public Sales createNonSerializedSalesRecord(String boxBarcode, String productName, 
                                               String employeeId, String shopName, String orderId, 
                                               String note, int quantity) {
@@ -201,7 +201,7 @@ public class SalesService extends BaseServiceImpl<Sales, Long, SalesRepository> 
     /**
      * Save a sales record
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public Sales save(Sales sales) {
         // Add detailed debug logging with stack trace - this will help us identify where the call is coming from
         logger.info("SalesService.save - Initial isDirectSales value: {}", sales.getIsDirectSales());

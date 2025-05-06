@@ -47,20 +47,12 @@ export default function Catalog() {
     try {
       setTableLoading(true);
       setError(null);
-      const response = await productApi.getProducts(page, size, sortField, sortDirection);
+      const response = await productApi.getProducts(page, size, sortField, sortDirection, searchTerm);
       console.log('Loaded products:', response);
       
       let filteredData = response.data;
       
-      // Apply search filter if searchTerm exists
-      if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
-        filteredData = filteredData.filter(product => 
-          product.boxBarcode.toLowerCase().includes(searchLower) ||
-          product.productName.toLowerCase().includes(searchLower)
-        );
-      }
-
+      // Remove frontend search filter (searchTerm)
       // Apply SN filter if not 'all'
       if (snFilter !== 'all') {
         filteredData = filteredData.filter(product => 

@@ -53,12 +53,13 @@ public class ProductController {
      * Get all products with sorting and pagination
      */
     @GetMapping
-    public ResponseEntity<List<ProductCatalog>> getAllProducts(
+    public ResponseEntity<org.springframework.data.domain.Page<ProductCatalog>> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "id") String sort,
-            @RequestParam(defaultValue = "asc") String direction) {
-        return ResponseEntity.ok(productService.getAllProducts(page, size, sort, direction));
+            @RequestParam(defaultValue = "asc") String direction,
+            @RequestParam(required = false) String search) {
+        return ResponseEntity.ok(productService.getAllProductsPage(page, size, sort, direction, search));
     }
     
     /**

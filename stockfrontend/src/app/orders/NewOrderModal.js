@@ -331,7 +331,8 @@ export default function NewOrderModal({ isOpen, onClose }) {
       onClose();
     } catch (error) {
       console.error('Error creating order:', error);
-      setError(error.message || 'Failed to create order');
+      // Prefer backend error message if available
+      setError(error.data?.message || error.message || 'Failed to create order');
     } finally {
       setLoading(false);
     }

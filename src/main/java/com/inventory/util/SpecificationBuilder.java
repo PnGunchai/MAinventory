@@ -2,6 +2,7 @@ package com.inventory.util;
 
 import org.springframework.data.jpa.domain.Specification;
 import java.time.ZonedDateTime;
+import jakarta.persistence.criteria.Predicate;
 
 /**
  * Utility class for building JPA specifications for dynamic filtering
@@ -82,5 +83,22 @@ public class SpecificationBuilder {
      */
     public static <T> Specification<T> dateBetween(String fieldName, ZonedDateTime startDate, ZonedDateTime endDate) {
         return between(fieldName, startDate, endDate);
+    }
+    
+    /**
+     * Create a specification for multi-field 'like' search
+     */
+    public static <T> Specification<T> multiFieldLike(String[] fieldNames, String value) {
+        return (root, query, criteriaBuilder) -> {
+            if (value == null || value.isEmpty()) {
+                return null;
+            }
+            String pattern = "%" + value.toLowerCase() + "%";
+            return criteriaBuilder.or(
+                java.util.Arrays.stream(fieldNames)
+                    .map(field -> criteriaBuilder.like(criteriaBuilder.lower(root.get(field)), pattern))
+                    .toArray(Predicate[]::new)
+            );
+        };
     }
 } 

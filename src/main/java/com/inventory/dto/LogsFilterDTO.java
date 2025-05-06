@@ -57,6 +57,9 @@ public class LogsFilterDTO {
     @Pattern(regexp = "^(asc|desc)$", message = "Sort direction must be 'asc' or 'desc'")
     private String sortDirection = "desc";
 
+    @Schema(description = "Generic search term for multi-field search")
+    private String search;
+
     @AssertTrue(message = "End date must be after start date")
     private boolean isDateRangeValid() {
         if (startDate == null || endDate == null) {

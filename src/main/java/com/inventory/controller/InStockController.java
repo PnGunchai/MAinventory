@@ -5,6 +5,9 @@ import com.inventory.service.InStockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import com.inventory.dto.PageResponseDTO;
 
 import java.util.List;
 
@@ -40,5 +43,19 @@ public class InStockController {
     @GetMapping("/product/{productBarcode}")
     public ResponseEntity<InStock> getInStockByProductBarcode(@PathVariable String productBarcode) {
         return ResponseEntity.ok(inStockService.getInStockByProductBarcode(productBarcode));
+    }
+
+    /**
+     * Get paginated and searchable in-stock items
+     */
+    @GetMapping("/page")
+    public ResponseEntity<PageResponseDTO<InStock>> getInStockPage(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size,
+        @RequestParam(required = false) String search
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        var result = inStockService.getInStockPage(search, pageable);
+        return ResponseEntity.ok(PageResponseDTO.from(result));
     }
 } 

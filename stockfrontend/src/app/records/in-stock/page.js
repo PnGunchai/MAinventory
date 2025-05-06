@@ -11,16 +11,33 @@ export default function InStockPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [page, setPage] = useState(0);
+    const [pageSize, setPageSize] = useState(20);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalElements, setTotalElements] = useState(0);
+
+    useEffect(() => {
+        fetchInStockItems({ page: 0 });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchTerm, pageSize]);
 
     useEffect(() => {
         fetchInStockItems();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [page]);
 
-    const fetchInStockItems = async () => {
+    const fetchInStockItems = async (opts = {}) => {
         try {
             setLoading(true);
-            const data = await inStockApi.getAllInStock();
-            setInStockItems(data);
+            const response = await inStockApi.getPaginatedInStock({
+                page: opts.page ?? page,
+                size: opts.pageSize ?? pageSize,
+                search: opts.searchTerm ?? searchTerm
+            });
+            setInStockItems(response.content || []);
+            setTotalPages(response.totalPages || 1);
+            setTotalElements(response.totalElements || 0);
+            setPage(response.page || 0);
             setError(null);
         } catch (err) {
             setError('Failed to fetch in-stock items. Please try again later.');
@@ -29,16 +46,6 @@ export default function InStockPage() {
             setLoading(false);
         }
     };
-
-    const filteredItems = inStockItems.filter(item => {
-        const searchLower = searchTerm.toLowerCase();
-        return (
-            item.productName?.toLowerCase().includes(searchLower) ||
-            item.boxBarcode?.toLowerCase().includes(searchLower) ||
-            (item.productBarcode && item.productBarcode.toLowerCase().includes(searchLower)) ||
-            (item.boxNumber && item.boxNumber.toString().includes(searchTerm))
-        );
-    });
 
     if (error) {
         return (
@@ -61,7 +68,7 @@ export default function InStockPage() {
                                 type="text"
                                 placeholder={t('searchByProductNameBoxNumberBarcode')}
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => { setSearchTerm(e.target.value); setPage(0); }}
                                 className="flex-1 rounded-lg border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900 placeholder-gray-400 w-full"
                             />
                         </div>
@@ -96,7 +103,7 @@ export default function InStockPage() {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {filteredItems.map((item) => (
+                                {inStockItems.map((item) => (
                                     <tr key={item.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.productName}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.boxBarcode}</td>
@@ -107,7 +114,7 @@ export default function InStockPage() {
                                         </td>
                                     </tr>
                                 ))}
-                                {filteredItems.length === 0 && (
+                                {inStockItems.length === 0 && (
                                     <tr>
                                         <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
                                             {t('noItemsFound')}
@@ -117,6 +124,39 @@ export default function InStockPage() {
                             </tbody>
                         </table>
                     )}
+                </div>
+                {/* Pagination Controls */}
+                <div className="flex justify-between items-center p-4 border-t border-gray-200">
+                    <div className="text-sm text-gray-900">
+                        {t('showingResults', { productsLength: inStockItems.length, totalItems: totalElements })}
+                    </div>
+                    <div className="flex items-center space-x-4">
+                        <select
+                            className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900"
+                            value={pageSize}
+                            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(0); }}
+                        >
+                            <option value="20">{t('perPage20') || '20 / page'}</option>
+                            <option value="50">{t('perPage50') || '50 / page'}</option>
+                            <option value="100">{t('perPage100') || '100 / page'}</option>
+                        </select>
+                        <div className="space-x-2">
+                            <button
+                                className="px-3 py-1 border rounded text-gray-900 hover:bg-gray-50"
+                                onClick={() => setPage(Math.max(0, page - 1))}
+                                disabled={page === 0 || loading}
+                            >
+                                {t('previous')}
+                            </button>
+                            <button
+                                className="px-3 py-1 border rounded text-gray-900 hover:bg-gray-50"
+                                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                                disabled={page >= totalPages - 1 || loading}
+                            >
+                                {t('next')}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

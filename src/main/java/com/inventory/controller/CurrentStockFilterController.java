@@ -2,6 +2,7 @@ package com.inventory.controller;
 
 import com.inventory.dto.CurrentStockFilterDTO;
 import com.inventory.dto.PageResponseDTO;
+import com.inventory.dto.CurrentStockWithSnDTO;
 import com.inventory.model.CurrentStock;
 import com.inventory.service.CurrentStockFilterService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class CurrentStockFilterController {
      * Find current stock with filtering and pagination
      */
     @GetMapping
-    public ResponseEntity<PageResponseDTO<CurrentStock>> findCurrentStock(
+    public ResponseEntity<PageResponseDTO<CurrentStockWithSnDTO>> findCurrentStock(
             @RequestParam(required = false) String boxBarcode,
             @RequestParam(required = false) String productName,
             @RequestParam(required = false) Integer boxNumber,
@@ -45,7 +46,7 @@ public class CurrentStockFilterController {
         filter.setSortBy(sortBy);
         filter.setSortDirection(sortDirection);
         
-        Page<CurrentStock> currentStock = currentStockFilterService.findCurrentStock(filter);
+        var currentStock = currentStockFilterService.findCurrentStockWithSn(filter);
         
         return ResponseEntity.ok(PageResponseDTO.from(currentStock));
     }
@@ -54,8 +55,8 @@ public class CurrentStockFilterController {
      * Find current stock with filtering and pagination using POST
      */
     @PostMapping
-    public ResponseEntity<PageResponseDTO<CurrentStock>> findCurrentStockPost(@RequestBody CurrentStockFilterDTO filter) {
-        Page<CurrentStock> currentStock = currentStockFilterService.findCurrentStock(filter);
+    public ResponseEntity<PageResponseDTO<CurrentStockWithSnDTO>> findCurrentStockPost(@RequestBody CurrentStockFilterDTO filter) {
+        var currentStock = currentStockFilterService.findCurrentStockWithSn(filter);
         
         return ResponseEntity.ok(PageResponseDTO.from(currentStock));
     }

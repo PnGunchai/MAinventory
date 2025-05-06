@@ -142,6 +142,27 @@ public class ProductService {
     }
     
     /**
+     * Get all products with sorting and pagination
+     */
+    public org.springframework.data.domain.Page<ProductCatalog> getAllProductsPage(int page, int size, String sort, String direction, String search) {
+        org.springframework.data.domain.Sort.Direction sortDirection = 
+            direction.equalsIgnoreCase("desc") ? 
+            org.springframework.data.domain.Sort.Direction.DESC : 
+            org.springframework.data.domain.Sort.Direction.ASC;
+        org.springframework.data.domain.Pageable pageable = 
+            org.springframework.data.domain.PageRequest.of(
+                page, 
+                size, 
+                org.springframework.data.domain.Sort.by(sortDirection, sort)
+            );
+        if (search != null && !search.trim().isEmpty()) {
+            return productCatalogRepository.searchProducts(search, pageable);
+        } else {
+            return productCatalogRepository.findAll(pageable);
+        }
+    }
+    
+    /**
      * Update a product
      */
     @Transactional

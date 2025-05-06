@@ -20,23 +20,10 @@ export default function Logs() {
     setLoading(true);
     setError(null);
     try {
-      const response = await logsApi.getLogs(currentPage);
-      
-      // Client-side filtering
-      let filteredLogs = response.content || [];
-      if (debouncedSearchTerm) {
-        const searchLower = debouncedSearchTerm.toLowerCase();
-        filteredLogs = filteredLogs.filter(log => 
-          (log.productName || '').toLowerCase().includes(searchLower) ||
-          (log.boxNumber || '').toString().toLowerCase().includes(searchLower) ||
-          (log.productBarcode || '').toString().toLowerCase().includes(searchLower) ||
-          (log.operation || '').toLowerCase().includes(searchLower) ||
-          (log.orderId || '').toString().toLowerCase().includes(searchLower)
-        );
-      }
-      
-      setLogs(filteredLogs);
-      setTotalPages(Math.ceil(filteredLogs.length / 20)); // 20 items per page
+      // Pass both currentPage and debouncedSearchTerm to the API
+      const response = await logsApi.getLogs(currentPage, debouncedSearchTerm);
+      setLogs(response.content || []);
+      setTotalPages(response.totalPages || 0);
     } catch (err) {
       console.error('Error fetching logs:', err);
       setError(err.message || 'Failed to fetch logs');
@@ -101,10 +88,10 @@ export default function Logs() {
                   {t('productName')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  {t('boxNumber')}
+                  {t('productBarcode')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  {t('productBarcode')}
+                  {t('boxNumber')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   {t('operation')}
@@ -114,6 +101,9 @@ export default function Logs() {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   {t('orderID')}
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                  {t('notes')}
                 </th>
               </tr>
             </thead>
@@ -146,10 +136,10 @@ export default function Logs() {
                       {log.productName || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {log.boxNumber || '-'}
+                      {log.productBarcode || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {log.productBarcode || '-'}
+                      {log.boxNumber || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                       {log.operation ? t(log.operation) : '-'}
@@ -159,6 +149,9 @@ export default function Logs() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                       {log.orderId || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      {log.note || '-'}
                     </td>
                   </tr>
                 ))

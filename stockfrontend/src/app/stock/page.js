@@ -18,6 +18,10 @@ export default function Stock() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stockData, setStockData] = useState([]);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalElements, setTotalElements] = useState(0);
   const [sortConfig, setSortConfig] = useState({
     key: 'lastUpdated',
     direction: 'desc'
@@ -47,51 +51,39 @@ export default function Stock() {
   const [removeProcessing, setRemoveProcessing] = useState(false);
   const [formError, setFormError] = useState(null);
 
-  // Load stock data
-  const loadStockData = async () => {
+  // Load paginated stock data
+  const loadStockData = async (opts = {}) => {
     try {
       setLoading(true);
       setError(null);
-      const data = await productApi.getCurrentStock();
-      
-      // Fetch all products once
-      let products = [];
-      try {
-        const productsResponse = await productApi.getProducts();
-        products = productsResponse.data;
-      } catch (err) {
-        console.error('Error fetching all products:', err);
-      }
-
-      // Build details map
-      const details = {};
-      for (const item of data) {
-        if (!details[item.productName]) {
-          const product = products.find(p => p.productName === item.productName);
-          if (product) {
-            details[item.productName] = product;
-          }
-        }
-      }
-
-      // Combine stock data with product details
-      const enrichedData = data.map(item => ({
-        ...item,
-        numberSn: details[item.productName]?.numberSn || 0
-      }));
-
-      setStockData(enrichedData);
+      const response = await productApi.getPaginatedStock({
+        page: opts.page ?? page,
+        size: opts.pageSize ?? pageSize,
+        sortBy: sortConfig.key,
+        sortDirection: sortConfig.direction,
+        productName: opts.searchTerm ?? searchTerm
+      });
+      setStockData(response.content || []);
+      setTotalPages(response.totalPages || 1);
+      setTotalElements(response.totalElements || 0);
+      setPage(response.page || 0);
     } catch (err) {
-      console.error('Error loading stock data:', err);
-      setError(err.message);
+      setError(err.message || 'Failed to load stock data');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    loadStockData({ page: 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, sortConfig.key, sortConfig.direction, pageSize]);
+
+  // When page changes (but not search/sort/pageSize)
+  useEffect(() => {
     loadStockData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
   // Function to fetch product details
   const fetchProductDetails = async (boxBarcode) => {
@@ -262,6 +254,7 @@ export default function Stock() {
   // Handle search
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
+    setPage(0); // Reset to first page on new search
   };
 
   // Handle sort
@@ -270,6 +263,7 @@ export default function Stock() {
       key,
       direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
     }));
+    setPage(0); // Reset to first page on sort
   };
 
   // Get sort indicator
@@ -277,23 +271,6 @@ export default function Stock() {
     if (sortConfig.key !== key) return '↕';
     return sortConfig.direction === 'asc' ? '↑' : '↓';
   };
-
-  // Sort and filter data
-  const sortedAndFilteredData = [...stockData]
-    .filter(item => item.productName.toLowerCase().includes(searchTerm.toLowerCase()))
-    .sort((a, b) => {
-      if (sortConfig.key === 'totalQuantity') {
-        return sortConfig.direction === 'asc' 
-          ? a.totalQuantity - b.totalQuantity
-          : b.totalQuantity - a.totalQuantity;
-      }
-      if (sortConfig.key === 'lastUpdated') {
-        return sortConfig.direction === 'asc'
-          ? new Date(a.lastUpdated) - new Date(b.lastUpdated)
-          : new Date(b.lastUpdated) - new Date(a.lastUpdated);
-      }
-      return 0;
-    });
 
   // Form input component
   const FormInput = ({ label, name, value, onChange, type = 'text', required = false }) => (
@@ -684,14 +661,14 @@ export default function Stock() {
                     {t('error')}: {error}
                   </td>
                 </tr>
-              ) : sortedAndFilteredData.length === 0 ? (
+              ) : stockData.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
                     {t('noProductsFound')}
                   </td>
                 </tr>
               ) : (
-                sortedAndFilteredData.map((item) => (
+                stockData.map((item) => (
                   <tr key={item.productName} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                       {item.productName}
@@ -717,6 +694,42 @@ export default function Stock() {
               )}
             </tbody>
           </table>
+        </div>
+        {/* Pagination Controls */}
+        <div className="flex justify-between items-center p-4 border-t border-gray-200">
+          <div className="text-sm text-gray-900">
+            {t('showingResults', { productsLength: stockData.length, totalItems: totalElements })}
+          </div>
+          <div className="flex items-center space-x-4">
+            <select
+              className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900"
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(0);
+              }}
+            >
+              <option value="20">{t('perPage20') || '20 / page'}</option>
+              <option value="50">{t('perPage50') || '50 / page'}</option>
+              <option value="100">{t('perPage100') || '100 / page'}</option>
+            </select>
+            <div className="space-x-2">
+              <button
+                className="px-3 py-1 border rounded text-gray-900 hover:bg-gray-50"
+                onClick={() => setPage(Math.max(0, page - 1))}
+                disabled={page === 0 || loading}
+              >
+                {t('previous')}
+              </button>
+              <button
+                className="px-3 py-1 border rounded text-gray-900 hover:bg-gray-50"
+                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                disabled={page >= totalPages - 1 || loading}
+              >
+                {t('next')}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

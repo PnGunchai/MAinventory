@@ -83,8 +83,12 @@ export default apiCall;
 // Product Catalog API functions
 export const productApi = {
     // Get all products with pagination
-    getProducts: async (page = 0, size = 20, sort = 'boxBarcode', direction = 'asc') => {
-        const response = await apiCall(`/products?page=${page}&size=${size}&sort=${sort}&direction=${direction}`);
+    getProducts: async (page = 0, size = 20, sort = 'boxBarcode', direction = 'asc', search = '') => {
+        let url = `/products?page=${page}&size=${size}&sort=${sort}&direction=${direction}`;
+        if (search && search.trim() !== '') {
+            url += `&search=${encodeURIComponent(search)}`;
+        }
+        const response = await apiCall(url);
         console.log('Raw API response:', response); // Debug log
 
         // Handle array response
@@ -228,6 +232,24 @@ export const productApi = {
             method: 'POST',
             body: JSON.stringify(bulkData)
         });
+    },
+
+    getPaginatedStock: async ({
+      page = 0,
+      size = 20,
+      sortBy = 'lastUpdated',
+      sortDirection = 'desc',
+      productName = ''
+    } = {}) => {
+      const params = new URLSearchParams({
+        page,
+        size,
+        sortBy,
+        sortDirection
+      });
+      if (productName) params.append('productName', productName);
+      const response = await apiCall(`/stock/filter?${params.toString()}`);
+      return response; // Already in PageResponseDTO format
     },
 };
 
@@ -554,21 +576,9 @@ export const logsApi = {
                 page,
                 size: 20,
                 sortBy: 'timestamp',
-                sortDirection: 'desc'
+                sortDirection: 'desc',
+                search: search || undefined // Always send as 'search' field
             };
-            
-            // Add search parameters for partial matching
-            if (search) {
-                if (search.match(/^[0-9]+$/)) {
-                    // If numeric, search in product barcode and box barcode
-                    filterData.productBarcode = search;
-                  // filterData.boxBarcode = search;
-                } else {
-                    // If text, search in operation and product name
-                   // filterData.operation = search;
-                  //  filterData.productName = search;
-                }
-            }
             
             const response = await apiCall('/logs/filter', {
                 method: 'POST',
@@ -585,7 +595,8 @@ export const logsApi = {
                     productBarcode: log.productBarcode,
                     operation: log.operation,
                     quantity: log.quantity || 1,
-                    orderId: log.orderId
+                    orderId: log.orderId,
+                    note: log.note
                 })) || [],
                 totalPages: response.totalPages || 0,
                 totalElements: response.totalElements || 0
@@ -602,6 +613,21 @@ export const inStockApi = {
     // Get all in stock items
     getAllInStock: async () => {
         const response = await apiCall('/in-stock');
+        return response;
+    },
+
+    // Get paginated and searchable in-stock items
+    getPaginatedInStock: async ({
+        page = 0,
+        size = 20,
+        search = ''
+    } = {}) => {
+        const params = new URLSearchParams({
+            page,
+            size
+        });
+        if (search) params.append('search', search);
+        const response = await apiCall(`/in-stock/page?${params.toString()}`);
         return response;
     },
 
