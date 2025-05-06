@@ -2,7 +2,7 @@ package com.inventory.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Entity class for sales table
@@ -34,7 +34,7 @@ public class Sales {
     private String employeeId;
     
     @Column(name = "timestamp")
-    private LocalDateTime timestamp;
+    private ZonedDateTime timestamp;
 
     @Column(name = "box_number")
     private Integer boxNumber;
@@ -55,7 +55,7 @@ public class Sales {
     private Boolean isDirectSales = true;
     
     // Renamed method to avoid conflict with Lombok-generated setter
-    public void setSaleDateTime(LocalDateTime saleDate) {
+    public void setSaleDateTime(ZonedDateTime saleDate) {
         this.timestamp = saleDate;
     }
 
@@ -105,7 +105,7 @@ public class Sales {
             return this;
         }
         
-        public Builder timestamp(LocalDateTime timestamp) {
+        public Builder timestamp(ZonedDateTime timestamp) {
             sales.setTimestamp(timestamp);
             return this;
         }

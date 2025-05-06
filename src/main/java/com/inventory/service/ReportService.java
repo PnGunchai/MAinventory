@@ -11,13 +11,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.time.temporal.ChronoUnit;
 
 @Service
 public class ReportService {
@@ -60,7 +61,7 @@ public class ReportService {
                 
                 // Calculate days in inventory
                 if (stock.getLastUpdated() != null) {
-                    long daysInInventory = ChronoUnit.DAYS.between(stock.getLastUpdated(), LocalDateTime.now());
+                    long daysInInventory = ChronoUnit.DAYS.between(stock.getLastUpdated().toLocalDate(), ZonedDateTime.now(ZoneId.of("Asia/Bangkok")).toLocalDate());
                     dto.setDaysInInventory(daysInInventory);
                 }
                 
@@ -83,7 +84,7 @@ public class ReportService {
      * @return Movement analysis data
      */
     public List<InventoryMovementDTO> getInventoryMovementAnalysis(
-            LocalDateTime startDate, LocalDateTime endDate, String boxBarcode) {
+            ZonedDateTime startDate, ZonedDateTime endDate, String boxBarcode) {
         
         // Get all relevant logs within the date range
         List<Logs> logs;
@@ -165,7 +166,7 @@ public class ReportService {
                     
                     // Calculate days in inventory
                     if (stock.getLastUpdated() != null) {
-                        long daysInInventory = ChronoUnit.DAYS.between(stock.getLastUpdated(), LocalDateTime.now());
+                        long daysInInventory = ChronoUnit.DAYS.between(stock.getLastUpdated().toLocalDate(), ZonedDateTime.now(ZoneId.of("Asia/Bangkok")).toLocalDate());
                         dto.setDaysInInventory(daysInInventory);
                     }
                     

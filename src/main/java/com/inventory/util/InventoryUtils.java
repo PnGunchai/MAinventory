@@ -4,6 +4,8 @@ import com.inventory.exception.InvalidInputException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
 /**
  * Utility class for common inventory operations
@@ -38,7 +40,7 @@ public class InventoryUtils {
      * Generate a unique order ID
      */
     public static String generateOrderId(String prefix) {
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String timestamp = ZonedDateTime.now(ZoneId.of("Asia/Bangkok")).format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String random = String.format("%04d", new Random().nextInt(10000));
         
         return prefix + "-" + timestamp + "-" + random;

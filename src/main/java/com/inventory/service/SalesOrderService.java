@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
 /**
  * Service for sales order operations
@@ -80,8 +82,8 @@ public class SalesOrderService {
         invoice.setInvoice(orderDTO.getOrderId());
         invoice.setEmployeeId(orderDTO.getEmployeeId());
         invoice.setShopName(orderDTO.getShopName());
-        invoice.setTimestamp(java.time.LocalDateTime.now());
-        invoice.setLastModified(java.time.LocalDateTime.now());
+        invoice.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
+        invoice.setLastModified(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         invoice.setNote(orderDTO.getNote());
         invoice.setEditCount(0);
         invoice.setEditHistory(null);
@@ -323,7 +325,7 @@ public class SalesOrderService {
         invoice.addEditHistory("UPDATE_NOTES", "Updated order notes: " + note);
         // Append the new note to the existing note, prepending a timestamp
         String oldNote = invoice.getNote();
-        String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String timestamp = ZonedDateTime.now(ZoneId.of("Asia/Bangkok")).format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         String noteWithTimestamp = "[" + timestamp + "] " + note;
         String newNote = (oldNote != null && !oldNote.isEmpty()) ? oldNote + "\n" + noteWithTimestamp : noteWithTimestamp;
         invoice.setNote(newNote);

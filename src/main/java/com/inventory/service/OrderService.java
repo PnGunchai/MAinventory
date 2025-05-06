@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.Random;
 
 /**
@@ -102,7 +104,7 @@ public class OrderService {
      */
     private String generateBrokenItemId() {
         String prefix = "DMG";
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String timestamp = ZonedDateTime.now(ZoneId.of("Asia/Bangkok")).format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String random = String.format("%04d", new Random().nextInt(10000));
         
         return prefix + "-" + timestamp + "-" + random;
@@ -229,7 +231,7 @@ public class OrderService {
             lentId.setLentId(orderDTO.getOrderId());
             lentId.setEmployeeId(orderDTO.getEmployeeId());
             lentId.setShopName(orderDTO.getShopName());
-            lentId.setTimestamp(LocalDateTime.now());
+            lentId.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
             lentId.setNote(orderDTO.getNote());
             lentId.setStatus("active");
             
@@ -238,7 +240,7 @@ public class OrderService {
             // Create BrokenId record
             BrokenId brokenId = new BrokenId();
             brokenId.setBrokenId(orderDTO.getOrderId());
-            brokenId.setTimestamp(LocalDateTime.now());
+            brokenId.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
             brokenId.setNote(orderDTO.getNote());
             
             brokenIdRepository.save(brokenId);

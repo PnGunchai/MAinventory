@@ -18,7 +18,8 @@ import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.List;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
 @Service
 public class SalesService extends BaseServiceImpl<Sales, Long, SalesRepository> {
@@ -95,7 +96,7 @@ public class SalesService extends BaseServiceImpl<Sales, Long, SalesRepository> 
             sales.setProductBarcode(productBarcode);
             sales.setEmployeeId(employeeId);
             sales.setShopName(shopName);
-            sales.setTimestamp(LocalDateTime.now());
+            sales.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
             sales.setBoxNumber(boxNumber);
             sales.setNote(note);
             sales.setOrderId(orderId);
@@ -147,7 +148,7 @@ public class SalesService extends BaseServiceImpl<Sales, Long, SalesRepository> 
                 invoice.setShopName(shopName != null ? shopName : "DEFAULT");
                 
                 // Initialize timestamp fields
-                LocalDateTime now = LocalDateTime.now();
+                ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Bangkok"));
                 invoice.setTimestamp(now);
                 invoice.setLastModified(now);  // Initial creation is also the last modification
                 
@@ -252,7 +253,7 @@ public class SalesService extends BaseServiceImpl<Sales, Long, SalesRepository> 
 
     public Sales createSales(Sales sales) {
         // Set default values
-        sales.setSaleDateTime(LocalDateTime.now());
+        sales.setSaleDateTime(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         
         // Store the initial value to detect changes
         Boolean initialIsDirectSales = sales.getIsDirectSales();

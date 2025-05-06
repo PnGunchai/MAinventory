@@ -12,8 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 /**
@@ -95,10 +96,8 @@ public class LentIdController {
     public ResponseEntity<List<LentId>> searchByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        
-        LocalDateTime startDateTime = startDate.atStartOfDay();
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        
+        ZonedDateTime startDateTime = startDate.atStartOfDay(ZoneId.of("Asia/Bangkok"));
+        ZonedDateTime endDateTime = endDate.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Bangkok"));
         return ResponseEntity.ok(lentIdRepository.findByTimestampBetween(startDateTime, endDateTime));
     }
     

@@ -7,6 +7,7 @@ import NewBrokenOrderModal from './NewBrokenOrderModal';
 import EditOrderModal from '../../components/EditOrderModal';
 import AddItemsModal from '../../components/AddItemsModal';
 import { useTranslation } from 'react-i18next';
+import { formatDateTime } from '@/utils/dateUtils';
 
 // Debounce helper function
 function debounce(func, wait) {
@@ -583,14 +584,7 @@ export default function Orders() {
                         {activeTab === 'sales' ? (order.orderId || 'N/A') : (order.lentId || 'N/A')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {order.timestamp ? new Date(order.timestamp).toLocaleString('th-TH', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          hour12: false
-                        }) : 'N/A'}
+                        {order.timestamp ? formatDateTime(order.timestamp) : 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                         {order.shopName || 'N/A'}
@@ -887,14 +881,7 @@ export default function Orders() {
                 <p className="text-gray-900">{t('orderId')}: {viewOrder.orderId}</p>
                 <p className="text-gray-900">{t('shop')}: {viewOrder.shopName}</p>
                 <p className="text-gray-900">{t('employee')}: {viewOrder.employeeId}</p>
-                <p className="text-gray-900">{t('date')}: {new Date(viewOrder.timestamp).toLocaleString('th-TH', {
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: false
-                })}</p>
+                <p className="text-gray-900">{t('date')}: {formatDateTime(viewOrder.timestamp)}</p>
                 {activeTab === 'lent' && (
                   <p className="text-gray-900">{t('status')}: {t(viewOrder.status)}</p>
                 )}

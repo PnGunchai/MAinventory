@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { orderApi } from '@/services/api';
 import { useAuthStore } from '@/store/authStore';
+import { formatDateTime } from '@/utils/dateUtils';
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -116,7 +117,7 @@ export default function Dashboard() {
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900">{order.employeeId}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900">{order.shopName}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900">
-                      {new Date(order.timestamp).toLocaleString()}
+                      {formatDateTime(order.timestamp)}
                     </td>
                   </tr>
                 ))

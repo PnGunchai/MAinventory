@@ -1,6 +1,7 @@
 package com.inventory.service;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -85,7 +86,7 @@ public class BoxNumberService {
         boxNumber.setBoxBarcode(boxBarcode);
         boxNumber.setProductName(productName);
         boxNumber.setBoxNumber(nextBoxNumber);
-        boxNumber.setLastUpdated(LocalDateTime.now());
+        boxNumber.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         
         return boxNumberRepository.save(boxNumber);
     }
@@ -235,7 +236,7 @@ public class BoxNumberService {
         boxNumber.setProductName(productName);
         boxNumber.setProductBarcode(productBarcode);
         boxNumber.setBoxNumber(highestBoxNumber + 1);
-        boxNumber.setLastUpdated(LocalDateTime.now());
+        boxNumber.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         
         return boxNumberRepository.save(boxNumber);
     }

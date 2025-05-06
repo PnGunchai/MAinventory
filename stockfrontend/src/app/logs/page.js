@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { logsApi } from '@/services/api';
 import { useTranslation } from 'react-i18next';
+import { formatDateTime } from '@/utils/dateUtils';
 
 export default function Logs() {
   const { i18n, t } = useTranslation();
@@ -139,14 +140,7 @@ export default function Logs() {
                 logs.map((log, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {new Date(log.timestamp).toLocaleString('th-TH', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false
-                      })}
+                      {formatDateTime(log.timestamp)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                       {log.productName || '-'}

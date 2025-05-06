@@ -10,8 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,8 +54,8 @@ public class BulkLogsService {
         }
         
         // Get start and end time for the date
-        LocalDateTime startTime = date.atStartOfDay();
-        LocalDateTime endTime = date.atTime(LocalTime.MAX);
+        ZonedDateTime startTime = date.atStartOfDay(ZoneId.of("Asia/Bangkok"));
+        ZonedDateTime endTime = date.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Bangkok"));
         
         // Get all logs for the date
         List<Logs> logs = logsRepository.findByTimestampBetween(startTime, endTime);

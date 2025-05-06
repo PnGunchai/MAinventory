@@ -19,8 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.PageImpl;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -124,10 +125,8 @@ public class SalesController {
     public ResponseEntity<List<Sales>> searchByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        
-        LocalDateTime startDateTime = startDate.atStartOfDay();
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        
+        ZonedDateTime startDateTime = startDate.atStartOfDay(ZoneId.of("Asia/Bangkok"));
+        ZonedDateTime endDateTime = endDate.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Bangkok"));
         return ResponseEntity.ok(salesRepository.findByTimestampBetween(startDateTime, endDateTime));
     }
     
@@ -137,8 +136,7 @@ public class SalesController {
     @GetMapping("/report/daily-count")
     public ResponseEntity<Long> getDailyCount(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        
-        LocalDateTime dateTime = date.atStartOfDay();
+        ZonedDateTime dateTime = date.atStartOfDay(ZoneId.of("Asia/Bangkok"));
         return ResponseEntity.ok(salesRepository.countByDay(dateTime));
     }
     
@@ -148,8 +146,7 @@ public class SalesController {
     @GetMapping("/report/daily-quantity")
     public ResponseEntity<Integer> getDailyQuantity(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        
-        LocalDateTime dateTime = date.atStartOfDay();
+        ZonedDateTime dateTime = date.atStartOfDay(ZoneId.of("Asia/Bangkok"));
         Integer quantity = salesRepository.sumQuantityByDay(dateTime);
         return ResponseEntity.ok(quantity != null ? quantity : 0);
     }
@@ -162,10 +159,8 @@ public class SalesController {
         LocalDate today = LocalDate.now();
         LocalDate firstDayOfMonth = today.withDayOfMonth(1);
         LocalDate lastDayOfMonth = today.withDayOfMonth(today.lengthOfMonth());
-        
-        LocalDateTime startDateTime = firstDayOfMonth.atStartOfDay();
-        LocalDateTime endDateTime = lastDayOfMonth.atTime(LocalTime.MAX);
-        
+        ZonedDateTime startDateTime = firstDayOfMonth.atStartOfDay(ZoneId.of("Asia/Bangkok"));
+        ZonedDateTime endDateTime = lastDayOfMonth.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Bangkok"));
         return ResponseEntity.ok(salesRepository.findByTimestampBetween(startDateTime, endDateTime));
     }
     
@@ -177,10 +172,8 @@ public class SalesController {
             @PathVariable String employeeId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        
-        LocalDateTime startDateTime = startDate.atStartOfDay();
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        
+        ZonedDateTime startDateTime = startDate.atStartOfDay(ZoneId.of("Asia/Bangkok"));
+        ZonedDateTime endDateTime = endDate.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Bangkok"));
         return ResponseEntity.ok(salesRepository.findByEmployeeIdAndTimestampBetween(
                 employeeId, startDateTime, endDateTime));
     }
@@ -193,10 +186,8 @@ public class SalesController {
             @PathVariable String shopName,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        
-        LocalDateTime startDateTime = startDate.atStartOfDay();
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        
+        ZonedDateTime startDateTime = startDate.atStartOfDay(ZoneId.of("Asia/Bangkok"));
+        ZonedDateTime endDateTime = endDate.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Bangkok"));
         return ResponseEntity.ok(salesRepository.findByShopNameAndTimestampBetween(
                 shopName, startDateTime, endDateTime));
     }

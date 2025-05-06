@@ -2,7 +2,7 @@ package com.inventory.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Entity class for broken table
@@ -31,7 +31,7 @@ public class Broken {
     private String condition;
     
     @Column(name = "timestamp")
-    private LocalDateTime timestamp;
+    private ZonedDateTime timestamp;
 
     @Column(name = "box_number")
     private Integer boxNumber;
@@ -65,7 +65,7 @@ public class Broken {
         this.orderId = orderId;
     }
 
-    public void setReportDate(LocalDateTime reportDate) {
+    public void setReportDate(ZonedDateTime reportDate) {
         this.timestamp = reportDate;
     }
 } 

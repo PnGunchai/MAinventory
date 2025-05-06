@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 /**
@@ -45,12 +46,12 @@ public interface LogsRepository extends JpaRepository<Logs, Long>, JpaSpecificat
     /**
      * Find logs by timestamp between start and end time
      */
-    List<Logs> findByTimestampBetween(LocalDateTime startTime, LocalDateTime endTime);
+    List<Logs> findByTimestampBetween(ZonedDateTime startTime, ZonedDateTime endTime);
 
     /**
      * Find logs by timestamp between start and end time and box barcode
      */
-    List<Logs> findByTimestampBetweenAndBoxBarcode(LocalDateTime startTime, LocalDateTime endTime, String boxBarcode);
+    List<Logs> findByTimestampBetweenAndBoxBarcode(ZonedDateTime startTime, ZonedDateTime endTime, String boxBarcode);
 
     /**
      * Count logs by box barcode, product name, and box number
@@ -117,25 +118,25 @@ public interface LogsRepository extends JpaRepository<Logs, Long>, JpaSpecificat
     /**
      * Find logs by timestamp between start and end time with pagination
      */
-    Page<Logs> findByTimestampBetween(LocalDateTime startTime, LocalDateTime endTime, Pageable pageable);
+    Page<Logs> findByTimestampBetween(ZonedDateTime startTime, ZonedDateTime endTime, Pageable pageable);
     
     /**
      * Find logs by box barcode and timestamp between with pagination
      */
     Page<Logs> findByBoxBarcodeAndTimestampBetween(
-            String boxBarcode, LocalDateTime startTime, LocalDateTime endTime, Pageable pageable);
+            String boxBarcode, ZonedDateTime startTime, ZonedDateTime endTime, Pageable pageable);
     
     /**
      * Find logs by product barcode and timestamp between with pagination
      */
     Page<Logs> findByProductBarcodeAndTimestampBetween(
-            String productBarcode, LocalDateTime startTime, LocalDateTime endTime, Pageable pageable);
+            String productBarcode, ZonedDateTime startTime, ZonedDateTime endTime, Pageable pageable);
     
     /**
      * Find logs by operation and timestamp between with pagination
      */
     Page<Logs> findByOperationAndTimestampBetween(
-            String operation, LocalDateTime startTime, LocalDateTime endTime, Pageable pageable);
+            String operation, ZonedDateTime startTime, ZonedDateTime endTime, Pageable pageable);
 
     Page<Logs> findByOrderId(String orderId, Pageable pageable);
 

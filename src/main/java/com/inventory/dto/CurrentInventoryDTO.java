@@ -1,6 +1,7 @@
 package com.inventory.dto;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class CurrentInventoryDTO {
     private String boxBarcode;
@@ -8,7 +9,8 @@ public class CurrentInventoryDTO {
     private String productBarcode;
     private Integer quantity;
     private Integer boxNumber;
-    private LocalDateTime lastUpdated;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX", timezone = "Asia/Bangkok")
+    private ZonedDateTime lastUpdated;
     private Long daysInInventory;
     
     // Getters and setters
@@ -52,11 +54,11 @@ public class CurrentInventoryDTO {
         this.boxNumber = boxNumber;
     }
     
-    public LocalDateTime getLastUpdated() {
+    public ZonedDateTime getLastUpdated() {
         return lastUpdated;
     }
     
-    public void setLastUpdated(LocalDateTime lastUpdated) {
+    public void setLastUpdated(ZonedDateTime lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
     

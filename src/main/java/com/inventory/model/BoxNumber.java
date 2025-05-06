@@ -2,7 +2,7 @@ package com.inventory.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Entity class for box_number table
@@ -31,7 +31,7 @@ public class BoxNumber {
     private Integer boxNumber;
     
     @Column(name = "last_updated")
-    private LocalDateTime lastUpdated;
+    private ZonedDateTime lastUpdated;
     
     // Getters and setters
     public Integer getBoxNumber() {
@@ -66,11 +66,11 @@ public class BoxNumber {
         this.productBarcode = productBarcode;
     }
     
-    public LocalDateTime getLastUpdated() {
+    public ZonedDateTime getLastUpdated() {
         return lastUpdated;
     }
     
-    public void setLastUpdated(LocalDateTime lastUpdated) {
+    public void setLastUpdated(ZonedDateTime lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
 } 

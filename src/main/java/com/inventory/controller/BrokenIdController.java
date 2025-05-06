@@ -8,8 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 /**
@@ -47,10 +48,8 @@ public class BrokenIdController {
     public ResponseEntity<List<BrokenId>> searchByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        
-        LocalDateTime startDateTime = startDate.atStartOfDay();
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        
+        ZonedDateTime startDateTime = startDate.atStartOfDay(ZoneId.of("Asia/Bangkok"));
+        ZonedDateTime endDateTime = endDate.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Bangkok"));
         return ResponseEntity.ok(brokenIdRepository.findByTimestampBetween(startDateTime, endDateTime));
     }
     
@@ -69,8 +68,8 @@ public class BrokenIdController {
     public ResponseEntity<Long> getDailyCount(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         
-        LocalDateTime startDateTime = date.atStartOfDay();
-        LocalDateTime endDateTime = date.atTime(LocalTime.MAX);
+        ZonedDateTime startDateTime = date.atStartOfDay(ZoneId.of("Asia/Bangkok"));
+        ZonedDateTime endDateTime = date.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Bangkok"));
         
         List<BrokenId> brokenItems = brokenIdRepository.findByTimestampBetween(startDateTime, endDateTime);
         return ResponseEntity.ok((long) brokenItems.size());
@@ -85,8 +84,8 @@ public class BrokenIdController {
         LocalDate firstDayOfMonth = today.withDayOfMonth(1);
         LocalDate lastDayOfMonth = today.withDayOfMonth(today.lengthOfMonth());
         
-        LocalDateTime startDateTime = firstDayOfMonth.atStartOfDay();
-        LocalDateTime endDateTime = lastDayOfMonth.atTime(LocalTime.MAX);
+        ZonedDateTime startDateTime = firstDayOfMonth.atStartOfDay(ZoneId.of("Asia/Bangkok"));
+        ZonedDateTime endDateTime = lastDayOfMonth.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Bangkok"));
         
         return ResponseEntity.ok(brokenIdRepository.findByTimestampBetween(startDateTime, endDateTime));
     }

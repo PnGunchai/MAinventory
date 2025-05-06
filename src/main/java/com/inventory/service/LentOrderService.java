@@ -29,7 +29,8 @@ import jakarta.persistence.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import java.util.Map;
 import com.inventory.model.Sales;
 import com.inventory.model.Invoice;
 import java.util.Optional;
+import java.time.OffsetDateTime;
 
 /**
  * Service for lent order operations
@@ -144,7 +146,7 @@ public class LentOrderService {
         lentId.setLentId(orderDTO.getOrderId());
         lentId.setEmployeeId(orderDTO.getEmployeeId());
         lentId.setShopName(orderDTO.getShopName());
-        lentId.setTimestamp(LocalDateTime.now());
+        lentId.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         lentId.setNote(orderDTO.getNote());
         lentId.setStatus("active");
         
@@ -246,6 +248,7 @@ public class LentOrderService {
                 quantity
             );
             lentLog.setOrderId(orderDTO.getOrderId());
+            lentLog.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
             logsService.save(lentLog);
             
             // Update current stock quantity
@@ -257,7 +260,7 @@ public class LentOrderService {
                 
                 // Deduct the quantity
                 stock.setQuantity(stock.getQuantity() - quantity);
-                stock.setLastUpdated(LocalDateTime.now());
+                stock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
                 currentStockRepository.save(stock);
                 
                 logger.info("Updated current stock for {} to {}", boxBarcode, stock.getQuantity());
@@ -503,7 +506,7 @@ public class LentOrderService {
                 returnedPortion.setProductName(lentItem.getProductName());
                 returnedPortion.setEmployeeId(request.getEmployeeId());
                 returnedPortion.setShopName(lentItem.getShopName());
-                returnedPortion.setTimestamp(LocalDateTime.now());
+                returnedPortion.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
                 returnedPortion.setQuantity(returnQuantity);
                 returnedPortion.setOrderId(orderId);
                 returnedPortion.setStatus("returned");
@@ -542,7 +545,7 @@ public class LentOrderService {
                 soldPortion.setProductName(lentItem.getProductName());
                 soldPortion.setEmployeeId(request.getEmployeeId());
                 soldPortion.setShopName(lentItem.getShopName());
-                soldPortion.setTimestamp(LocalDateTime.now());
+                soldPortion.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
                 soldPortion.setQuantity(salesQuantity);
                 soldPortion.setOrderId(orderId);
                 soldPortion.setStatus("lent to sales");
@@ -663,7 +666,7 @@ public class LentOrderService {
         returnRecord.setProductBarcode(null);
         returnRecord.setEmployeeId(request.getEmployeeId());
         returnRecord.setShopName(lentItem.getShopName());
-        returnRecord.setTimestamp(LocalDateTime.now());
+        returnRecord.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         returnRecord.setQuantity(returnQuantity);
         returnRecord.setOrderId(orderId);
         returnRecord.setStatus("returned");
@@ -873,7 +876,7 @@ public class LentOrderService {
         sale.setBoxNumber(null);
         sale.setIsDirectSales(request.getIsDirectSales());
         sale.setQuantity(requestedQuantity);
-        sale.setTimestamp(LocalDateTime.now());
+        sale.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
 
         // Get or create invoice
         Invoice invoice = getOrCreateInvoice(salesOrderId, request.getEmployeeId(), request.getShopName());
@@ -889,7 +892,7 @@ public class LentOrderService {
         saleLog.setOperation("moved_from_lent_to_sales");
         saleLog.setNote("Moved from lent order: " + orderId);
         saleLog.setOrderId(salesOrderId);
-        saleLog.setTimestamp(LocalDateTime.now());
+        saleLog.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         logsRepository.save(saleLog);
 
         // Create record for sold portion
@@ -898,7 +901,7 @@ public class LentOrderService {
         soldPortion.setProductName(originalLentItem.getProductName());
         soldPortion.setEmployeeId(request.getEmployeeId());
         soldPortion.setShopName(request.getShopName());
-        soldPortion.setTimestamp(LocalDateTime.now());
+        soldPortion.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         soldPortion.setQuantity(requestedQuantity);
         soldPortion.setOrderId(orderId);
         soldPortion.setStatus("lent to sales");
@@ -1186,7 +1189,7 @@ public class LentOrderService {
                 summary.setEmployeeId(lentId.getEmployeeId());
                 summary.setShopName(lentId.getShopName());
                 summary.setStatus(lentId.getStatus()); // Will show "active" or "completed"
-                summary.setTimestamp(lentId.getTimestamp());
+                summary.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")).toOffsetDateTime());
                 summary.setNote(lentId.getNote());
                 
                 // Calculate total items from associated lent items
@@ -1275,7 +1278,7 @@ public class LentOrderService {
         invoice.setInvoice(salesOrderId);
         invoice.setEmployeeId(employeeId);
         invoice.setShopName(shopName);
-        invoice.setTimestamp(LocalDateTime.now());
+        invoice.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         return invoiceRepository.save(invoice);
     }
 } 

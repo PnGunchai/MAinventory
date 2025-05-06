@@ -2,7 +2,7 @@ package com.inventory.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Entity class for logs table
@@ -31,7 +31,7 @@ public class Logs {
     private String operation;
     
     @Column(name = "timestamp")
-    private LocalDateTime timestamp;
+    private ZonedDateTime timestamp;
     
     @Column(name = "note")
     private String note;

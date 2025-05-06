@@ -13,6 +13,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import jakarta.validation.ConstraintViolationException;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
@@ -36,7 +38,7 @@ public class GlobalExceptionHandler {
         logger.warn("Resource not found: {}", ex.getMessage());
         
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
+        body.put("timestamp", ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         body.put("status", HttpStatus.NOT_FOUND.value());
         body.put("error", "Not Found");
         body.put("message", ex.getMessage());
@@ -52,7 +54,7 @@ public class GlobalExceptionHandler {
         logger.warn("Invalid input: {}", ex.getMessage());
         
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
+        body.put("timestamp", ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("error", "Bad Request");
         body.put("message", ex.getMessage());
@@ -66,7 +68,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<Object> handleMissingParams(MissingServletRequestParameterException ex) {
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
+        body.put("timestamp", ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("error", "Bad Request");
         body.put("message", "Required parameter '" + ex.getParameterName() + "' is missing");
@@ -80,7 +82,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<Object> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
+        body.put("timestamp", ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("error", "Bad Request");
         body.put("message", "Parameter '" + ex.getName() + "' has invalid value: " + ex.getValue());
@@ -94,7 +96,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DateTimeParseException.class)
     public ResponseEntity<Object> handleDateTimeParseException(DateTimeParseException ex) {
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
+        body.put("timestamp", ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("error", "Bad Request");
         body.put("message", "Invalid date format: " + ex.getParsedString() + ". Use ISO date-time format (e.g., 2023-01-01T00:00:00)");
@@ -112,7 +114,7 @@ public class GlobalExceptionHandler {
         
         // Include more detailed error information in development/debugging
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
+        body.put("timestamp", ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         body.put("error", "Internal Server Error");
         body.put("exception", ex.getClass().getName());
@@ -129,7 +131,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, Object> response = new LinkedHashMap<>();
-        response.put("timestamp", LocalDateTime.now());
+        response.put("timestamp", ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         response.put("status", HttpStatus.BAD_REQUEST.value());
         response.put("error", "Validation Failed");
         
@@ -152,7 +154,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Map<String, Object>> handleConstraintViolation(ConstraintViolationException ex) {
         Map<String, Object> response = new LinkedHashMap<>();
-        response.put("timestamp", LocalDateTime.now());
+        response.put("timestamp", ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         response.put("status", HttpStatus.BAD_REQUEST.value());
         response.put("error", "Validation Failed");
         
@@ -173,7 +175,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PropertyReferenceException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidSortField(PropertyReferenceException ex) {
         Map<String, Object> response = new LinkedHashMap<>();
-        response.put("timestamp", LocalDateTime.now());
+        response.put("timestamp", ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         response.put("status", HttpStatus.BAD_REQUEST.value());
         response.put("error", "Invalid Sort Field");
         response.put("message", "Invalid sort field: " + ex.getPropertyName());
@@ -190,7 +192,7 @@ public class GlobalExceptionHandler {
         logger.error("Database error occurred", ex);
         
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
+        body.put("timestamp", ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         body.put("error", "Database Error");
         body.put("sqlState", ex.getSQLState());

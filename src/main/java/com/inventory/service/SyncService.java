@@ -12,7 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Isolation;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,7 +62,7 @@ public class SyncService {
                         newStock.setBoxBarcode(boxBarcode);
                         newStock.setProductName(productName);
                         newStock.setQuantity(0);
-                        newStock.setLastUpdated(LocalDateTime.now());
+                        newStock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
                         
                         // Get highest box number if available
                         Integer highestBoxNumber = boxNumberService.getHighestBoxNumber(boxBarcode, productName);
@@ -113,7 +114,7 @@ public class SyncService {
         }
         
         // Update last updated timestamp
-        stock.setLastUpdated(LocalDateTime.now());
+        stock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         
         // Get highest box number if available
         Integer highestBoxNumber = boxNumberService.getHighestBoxNumber(boxBarcode, productName);

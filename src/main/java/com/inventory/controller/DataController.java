@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.springframework.format.annotation.DateTimeFormat;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
 /**
  * Controller for accessing all table data
@@ -50,8 +52,8 @@ public class DataController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
         
         if (startDate != null && endDate != null) {
-            LocalDateTime start = startDate.atStartOfDay();
-            LocalDateTime end = endDate.atTime(LocalTime.MAX);
+            ZonedDateTime start = startDate.atStartOfDay(ZoneId.of("Asia/Bangkok"));
+            ZonedDateTime end = endDate.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Bangkok"));
             return ResponseEntity.ok(lendRepository.findByTimestampBetween(start, end, pageable));
         }
         
@@ -92,8 +94,8 @@ public class DataController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
         
         if (startDate != null && endDate != null) {
-            LocalDateTime start = startDate.atStartOfDay();
-            LocalDateTime end = endDate.atTime(LocalTime.MAX);
+            ZonedDateTime start = startDate.atStartOfDay(ZoneId.of("Asia/Bangkok"));
+            ZonedDateTime end = endDate.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Bangkok"));
             return ResponseEntity.ok(logsRepository.findByTimestampBetween(start, end, pageable));
         }
         
@@ -181,8 +183,8 @@ public class DataController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
         
         if (startDate != null && endDate != null) {
-            LocalDateTime start = startDate.atStartOfDay();
-            LocalDateTime end = endDate.atTime(LocalTime.MAX);
+            ZonedDateTime start = startDate.atStartOfDay(ZoneId.of("Asia/Bangkok"));
+            ZonedDateTime end = endDate.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Bangkok"));
             return ResponseEntity.ok(brokenRepository.findByTimestampBetween(start, end, pageable));
         }
         

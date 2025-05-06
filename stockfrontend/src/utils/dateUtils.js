@@ -1,3 +1,5 @@
+import { toZonedTime, format } from 'date-fns-tz';
+
 /**
  * Format a date string or timestamp into a localized date and time string
  * @param {string|Date} date - The date to format
@@ -6,14 +8,12 @@
 export const formatDateTime = (date) => {
     if (!date) return '';
     
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    
-    return dateObj.toLocaleString('th-TH', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-    });
+    // Parse as UTC if no timezone info
+    let dateObj = typeof date === 'string' && !date.endsWith('Z') && !date.includes('+')
+        ? new Date(date + 'Z')
+        : new Date(date);
+
+    const timeZone = 'Asia/Bangkok';
+    const zonedDate = toZonedTime(dateObj, timeZone);
+    return format(zonedDate, 'yyyy-MM-dd HH:mm', { timeZone });
 }; 

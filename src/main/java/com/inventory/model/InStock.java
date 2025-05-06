@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Entity for in_stock table
@@ -37,5 +37,5 @@ public class InStock {
     private Integer boxNumber;
     
     @Column(name = "added_timestamp")
-    private LocalDateTime addedTimestamp;
+    private ZonedDateTime addedTimestamp;
 } 

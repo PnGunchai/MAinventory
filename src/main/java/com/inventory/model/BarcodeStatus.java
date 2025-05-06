@@ -6,7 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "barcode_status")
@@ -23,7 +23,7 @@ public class BarcodeStatus {
     private String status;
     
     @Column(name = "last_updated")
-    private LocalDateTime lastUpdated;
+    private ZonedDateTime lastUpdated;
     
     public Long getId() {
         return id;
@@ -49,11 +49,11 @@ public class BarcodeStatus {
         this.status = status;
     }
     
-    public LocalDateTime getLastUpdated() {
+    public ZonedDateTime getLastUpdated() {
         return lastUpdated;
     }
     
-    public void setLastUpdated(LocalDateTime lastUpdated) {
+    public void setLastUpdated(ZonedDateTime lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
 } 

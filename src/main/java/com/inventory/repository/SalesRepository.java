@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,31 +51,31 @@ public interface SalesRepository extends JpaRepository<Sales, Long>, JpaSpecific
     /**
      * Find sales by timestamp between start and end time
      */
-    List<Sales> findByTimestampBetween(LocalDateTime startTime, LocalDateTime endTime);
+    List<Sales> findByTimestampBetween(ZonedDateTime startTime, ZonedDateTime endTime);
     
     /**
      * Get total sales count by day
      */
     @Query("SELECT COUNT(s) FROM Sales s WHERE DATE(s.timestamp) = DATE(?1)")
-    Long countByDay(LocalDateTime date);
+    Long countByDay(ZonedDateTime date);
     
     /**
      * Get total sales quantity by day
      */
     @Query("SELECT SUM(s.quantity) FROM Sales s WHERE DATE(s.timestamp) = DATE(?1)")
-    Integer sumQuantityByDay(LocalDateTime date);
+    Integer sumQuantityByDay(ZonedDateTime date);
     
     /**
      * Get sales by employee ID and date range
      */
     List<Sales> findByEmployeeIdAndTimestampBetween(
-            String employeeId, LocalDateTime startTime, LocalDateTime endTime);
+            String employeeId, ZonedDateTime startTime, ZonedDateTime endTime);
     
     /**
      * Get sales by shop name and date range
      */
     List<Sales> findByShopNameAndTimestampBetween(
-            String shopName, LocalDateTime startTime, LocalDateTime endTime);
+            String shopName, ZonedDateTime startTime, ZonedDateTime endTime);
     
     // New methods for pagination
     
@@ -112,19 +112,19 @@ public interface SalesRepository extends JpaRepository<Sales, Long>, JpaSpecific
     /**
      * Find sales by timestamp between start and end time with pagination
      */
-    Page<Sales> findByTimestampBetween(LocalDateTime startTime, LocalDateTime endTime, Pageable pageable);
+    Page<Sales> findByTimestampBetween(ZonedDateTime startTime, ZonedDateTime endTime, Pageable pageable);
     
     /**
      * Get sales by employee ID and date range with pagination
      */
     Page<Sales> findByEmployeeIdAndTimestampBetween(
-            String employeeId, LocalDateTime startTime, LocalDateTime endTime, Pageable pageable);
+            String employeeId, ZonedDateTime startTime, ZonedDateTime endTime, Pageable pageable);
     
     /**
      * Get sales by shop name and date range with pagination
      */
     Page<Sales> findByShopNameAndTimestampBetween(
-            String shopName, LocalDateTime startTime, LocalDateTime endTime, Pageable pageable);
+            String shopName, ZonedDateTime startTime, ZonedDateTime endTime, Pageable pageable);
 
     Optional<Sales> findByOrderIdAndProductBarcode(String orderId, String productBarcode);
     

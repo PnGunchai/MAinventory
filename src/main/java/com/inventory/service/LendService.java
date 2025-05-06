@@ -6,7 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ public class LendService {
         lend.setProductBarcode(productBarcode);
         lend.setEmployeeId(employeeId);
         lend.setShopName(shopName);
-        lend.setTimestamp(LocalDateTime.now());
+        lend.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         lend.setBoxNumber(boxNumber);
         lend.setNote(note);
         lend.setQuantity(quantity);

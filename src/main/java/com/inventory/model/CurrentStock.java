@@ -2,7 +2,7 @@ package com.inventory.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Entity class for current_stock table
@@ -28,7 +28,7 @@ public class CurrentStock {
     private Integer quantity;
     
     @Column(name = "last_updated")
-    private LocalDateTime lastUpdated;
+    private ZonedDateTime lastUpdated;
     
     @Column(name = "box_number")
     private Integer boxNumber;

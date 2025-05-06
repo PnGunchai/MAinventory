@@ -10,7 +10,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
 /**
  * Controller for filtering and paginating logs
@@ -31,8 +32,8 @@ public class LogsFilterController {
             @RequestParam(required = false) String productBarcode,
             @RequestParam(required = false) String productName,
             @RequestParam(required = false) String operation,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @RequestParam(required = false) ZonedDateTime startDate,
+            @RequestParam(required = false) ZonedDateTime endDate,
             @RequestParam(required = false) Integer boxNumber,
             @RequestParam(required = false) String orderId,
             @RequestParam(defaultValue = "0") int page,

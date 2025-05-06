@@ -12,7 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,7 +80,7 @@ public class InStockService {
         inStock.setBoxBarcode(boxBarcode);
         inStock.setProductName(productName);
         inStock.setBoxNumber(boxNumber);
-        inStock.setAddedTimestamp(LocalDateTime.now());
+        inStock.setAddedTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         
         // Set product barcode for serialized products
         if (product.getNumberSn() > 0 && productBarcode != null && !productBarcode.isEmpty()) {

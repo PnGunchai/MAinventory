@@ -10,7 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
 @Service
 public class BrokenService {
@@ -38,7 +39,7 @@ public class BrokenService {
                 if (!brokenIdRepository.findById(orderId).isPresent()) {
                     BrokenId brokenId = new BrokenId();
                     brokenId.setBrokenId(orderId);
-                    brokenId.setTimestamp(LocalDateTime.now());
+                    brokenId.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
                     brokenId.setNote(note);
                     
                     brokenIdRepository.save(brokenId);
@@ -57,7 +58,7 @@ public class BrokenService {
         broken.setProductName(productName);
         broken.setProductBarcode(productBarcode);
         broken.setCondition(condition);
-        broken.setTimestamp(LocalDateTime.now());
+        broken.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         broken.setBoxNumber(boxNumber);
         broken.setNote(note);
         broken.setQuantity(quantity);

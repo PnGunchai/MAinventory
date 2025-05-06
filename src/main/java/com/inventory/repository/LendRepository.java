@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,7 +75,7 @@ public interface LendRepository extends JpaRepository<Lend, Long> {
                                             @Param("orderId") String orderId,
                                             @Param("status") String status);
 
-    Page<Lend> findByTimestampBetween(LocalDateTime start, LocalDateTime end, Pageable pageable);
+    Page<Lend> findByTimestampBetween(ZonedDateTime start, ZonedDateTime end, Pageable pageable);
     Page<Lend> findByBoxBarcode(String boxBarcode, Pageable pageable);
     Page<Lend> findByProductBarcode(String productBarcode, Pageable pageable);
     Page<Lend> findByOrderId(String orderId, Pageable pageable);

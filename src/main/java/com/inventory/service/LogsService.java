@@ -6,7 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 /**
@@ -32,7 +33,7 @@ public class LogsService {
         log.setProductName(productName);
         log.setProductBarcode(productBarcode);
         log.setOperation(operation);
-        log.setTimestamp(LocalDateTime.now());
+        log.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         log.setNote(note);
         log.setBoxNumber(boxNumber);
         log.setQuantity(quantity != null ? quantity : 1);
@@ -130,14 +131,14 @@ public class LogsService {
     /**
      * Get logs by timestamp between start and end time
      */
-    public List<Logs> getLogsByTimestampBetween(LocalDateTime startTime, LocalDateTime endTime) {
+    public List<Logs> getLogsByTimestampBetween(ZonedDateTime startTime, ZonedDateTime endTime) {
         return logsRepository.findByTimestampBetween(startTime, endTime);
     }
     
     /**
      * Get logs by timestamp between start and end time and box barcode
      */
-    public List<Logs> getLogsByTimestampBetweenAndBoxBarcode(LocalDateTime startTime, LocalDateTime endTime, String boxBarcode) {
+    public List<Logs> getLogsByTimestampBetweenAndBoxBarcode(ZonedDateTime startTime, ZonedDateTime endTime, String boxBarcode) {
         return logsRepository.findByTimestampBetweenAndBoxBarcode(startTime, endTime, boxBarcode);
     }
 

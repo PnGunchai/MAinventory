@@ -2,7 +2,7 @@ package com.inventory.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Entity class for lent items
@@ -30,7 +30,7 @@ public class Lend {
     private String employeeId;
     
     @Column(name = "timestamp")
-    private LocalDateTime timestamp;
+    private ZonedDateTime timestamp;
     
     @Column(name = "box_number")
     private Integer boxNumber;
@@ -78,7 +78,7 @@ public class Lend {
         this.orderId = orderId;
     }
 
-    public void setLentDate(LocalDateTime lentDate) {
+    public void setLentDate(ZonedDateTime lentDate) {
         this.timestamp = lentDate;
     }
 

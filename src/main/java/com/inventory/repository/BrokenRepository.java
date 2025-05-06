@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -24,10 +25,10 @@ public interface BrokenRepository extends JpaRepository<Broken, Long> {
      */
     List<Broken> findByProductBarcode(String productBarcode);
 
-    Page<Broken> findByTimestampBetween(LocalDateTime start, LocalDateTime end, Pageable pageable);
+    Page<Broken> findByTimestampBetween(ZonedDateTime start, ZonedDateTime end, Pageable pageable);
     Page<Broken> findByBoxBarcode(String boxBarcode, Pageable pageable);
     Page<Broken> findByProductBarcode(String productBarcode, Pageable pageable);
     Page<Broken> findByCondition(String condition, Pageable pageable);
 
-    List<Broken> findByTimestampBetween(LocalDateTime startTime, LocalDateTime endTime);
+    List<Broken> findByTimestampBetween(ZonedDateTime startTime, ZonedDateTime endTime);
 } 

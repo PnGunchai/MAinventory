@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { recordsApi } from '@/services/api';
 import { useTranslation } from 'react-i18next';
+import { formatDateTime } from '@/utils/dateUtils';
 
 export default function Records() {
   const { i18n, t } = useTranslation();
@@ -279,14 +280,7 @@ export default function Records() {
                       {getStatusDisplay(record)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {new Date(record.timestamp).toLocaleString('th-TH', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false
-                      })}
+                      {formatDateTime(record.timestamp)}
                     </td>
                   </tr>
                 ))

@@ -48,6 +48,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
 /**
  * Service for stock operations
@@ -132,7 +134,7 @@ public class StockService {
             invoice.setInvoice(orderId);
             invoice.setEmployeeId(employeeId);
             invoice.setShopName(shopName);
-            invoice.setTimestamp(LocalDateTime.now());
+            invoice.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
             return invoiceRepository.save(invoice);
         });
     }
@@ -198,7 +200,7 @@ public class StockService {
                 // Set box number
                 stock.setBoxNumber(boxNumber.getBoxNumber());
                 
-                stock.setLastUpdated(LocalDateTime.now());
+                stock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
                 
                 // Save and then explicitly refresh from the database
                 CurrentStock savedStock = currentStockRepository.save(stock);
@@ -404,7 +406,7 @@ public class StockService {
             
             // Update stock quantity
             stock.setQuantity(stock.getQuantity() - quantity);
-            stock.setLastUpdated(LocalDateTime.now());
+            stock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
             
             // Create log entry
             Logs log = logsService.createLog(boxBarcode, productName, productBarcode, "remove", note);
@@ -442,7 +444,7 @@ public class StockService {
             
             // Update stock quantity
             stock.setQuantity(stock.getQuantity() - quantity);
-            stock.setLastUpdated(LocalDateTime.now());
+            stock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
             
             // Create log entry
             Logs log = logsService.createLog(boxBarcode, productName, productBarcode, "remove", note);
@@ -530,7 +532,7 @@ public class StockService {
                          String condition, String note) {
         // Generate a default order ID for backward compatibility
         String defaultOrderId = destination.toUpperCase() + "-" + 
-                               LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+                               ZonedDateTime.now(ZoneId.of("Asia/Bangkok")).format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
         
         // Call the main implementation with default splitPair=true and isDirectSales=true
         moveStockImpl(boxBarcode, productBarcode, quantity, destination, employeeId, 
@@ -619,7 +621,7 @@ public class StockService {
                 sale.setIsDirectSales(isDirectSales);
                 sale.setQuantity(quantity);
                 sale.setInvoiceId(invoice.getInvoiceId());
-                sale.setTimestamp(LocalDateTime.now());
+                sale.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
                 salesService.save(sale);
 
                 // Update the lent record status
@@ -767,7 +769,7 @@ public class StockService {
                 sale.setIsDirectSales(isDirectSales);
                 sale.setQuantity(quantity);
                 sale.setInvoiceId(invoice.getInvoiceId()); // Use the actual invoice ID
-                sale.setTimestamp(LocalDateTime.now()); // Set the timestamp
+                sale.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok"))); // Set the timestamp
                 salesService.save(sale);
 
                 // Update the lent record status
@@ -832,7 +834,7 @@ public class StockService {
                 sale.setIsDirectSales(isDirectSales);
                 sale.setQuantity(quantity);
                 sale.setInvoiceId(invoice.getInvoiceId()); // Use the actual invoice ID
-                sale.setTimestamp(LocalDateTime.now()); // Set the timestamp
+                sale.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok"))); // Set the timestamp
                 salesService.save(sale);
 
                 // Update the lent record status
@@ -882,7 +884,7 @@ public class StockService {
                             Invoice invoice = getOrCreateInvoice(orderId, employeeId, shopName);
                             
                             sale.setInvoiceId(invoice.getInvoiceId()); // Use the actual invoice ID
-                            sale.setTimestamp(LocalDateTime.now()); // Set the timestamp
+                            sale.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok"))); // Set the timestamp
                             salesService.save(sale);
                             
                             // Create log entry for sales with original box number
@@ -915,7 +917,7 @@ public class StockService {
                             Invoice invoice = getOrCreateInvoice(orderId, employeeId, shopName);
                             
                             sale.setInvoiceId(invoice.getInvoiceId()); // Use the actual invoice ID
-                            sale.setTimestamp(LocalDateTime.now()); // Set the timestamp
+                            sale.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok"))); // Set the timestamp
                             salesService.save(sale);
                             
                             // Create log entry for non-serialized sales
@@ -939,7 +941,7 @@ public class StockService {
                                     .orElseThrow(() -> new ResourceNotFoundException("Stock not found"));
                             int quantityToDeduct = product.getNumberSn() == 2 ? quantity / 2 : quantity;
                             currentStock.setQuantity(currentStock.getQuantity() - quantityToDeduct);
-                            currentStock.setLastUpdated(LocalDateTime.now());
+                            currentStock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
                             currentStockRepository.save(currentStock);
                         }
 
@@ -1054,7 +1056,7 @@ public class StockService {
                         .orElseThrow(() -> new ResourceNotFoundException("Stock not found"));
                 int lentQuantityToDeduct = product.getNumberSn() == 2 ? quantity / 2 : quantity;
                 lentStock.setQuantity(lentStock.getQuantity() - lentQuantityToDeduct);
-                lentStock.setLastUpdated(LocalDateTime.now());
+                lentStock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
                 currentStockRepository.save(lentStock);
 
                 // Sync current stock with in_stock to ensure accurate quantity
@@ -1113,7 +1115,7 @@ public class StockService {
                         .orElseThrow(() -> new ResourceNotFoundException("Stock not found"));
                 int brokenQuantityToDeduct = product.getNumberSn() == 2 ? quantity / 2 : quantity;
                 brokenStock.setQuantity(brokenStock.getQuantity() - brokenQuantityToDeduct);
-                brokenStock.setLastUpdated(LocalDateTime.now());
+                brokenStock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
                 currentStockRepository.save(brokenStock);
                 break;
                 
@@ -1300,12 +1302,12 @@ public class StockService {
                 stock.setBoxBarcode(request.getBoxBarcode());
                 stock.setProductName(productName);
                 stock.setQuantity(pairs.size()); // Each pair counts as 1 quantity
-                stock.setLastUpdated(LocalDateTime.now());
+                stock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
             } else {
                 // Update existing stock
                 stock = existingStockOpt.get();
                 stock.setQuantity(stock.getQuantity() + pairs.size());
-                stock.setLastUpdated(LocalDateTime.now());
+                stock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
             }
             // Save the stock
             stock = currentStockRepository.save(stock);
@@ -1340,7 +1342,7 @@ public class StockService {
                     boxNumber2.setProductName(productName);
                     boxNumber2.setProductBarcode(barcode2);
                     boxNumber2.setBoxNumber(boxNumberValue);
-                    boxNumber2.setLastUpdated(LocalDateTime.now());
+                    boxNumber2.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
                     boxNumberRepository.save(boxNumber2);
                     try {
                         inStockService.addToStock(request.getBoxBarcode(), barcode2, productName, boxNumberValue);
@@ -1362,12 +1364,12 @@ public class StockService {
                 stock.setBoxBarcode(request.getBoxBarcode());
                 stock.setProductName(productName);
                 stock.setQuantity(request.getProductBarcodes().size());
-                stock.setLastUpdated(LocalDateTime.now());
+                stock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
             } else {
                 // Update existing stock
                 stock = existingStockOpt.get();
                 stock.setQuantity(stock.getQuantity() + request.getProductBarcodes().size());
-                stock.setLastUpdated(LocalDateTime.now());
+                stock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
             }
             
             // Save the stock
@@ -1433,7 +1435,7 @@ public class StockService {
         }
         
         stock.setBoxNumber(null); // No box number for SN=0
-        stock.setLastUpdated(LocalDateTime.now());
+        stock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         
         // Create a single log entry with the total quantity
         Logs log = logsService.createLog(boxBarcode, productName, null, "add", note, null, quantity);
@@ -1632,7 +1634,7 @@ public class StockService {
      */
     private String generateLentId(String employeeId) {
         // Format: EMPID-YYYYMMDD-HHMMSS
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
+        String timestamp = ZonedDateTime.now(ZoneId.of("Asia/Bangkok")).format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
         return employeeId + "-" + timestamp;
     }
 
@@ -1882,7 +1884,7 @@ public class StockService {
         secondBoxNumber.setProductName(productName);
         secondBoxNumber.setProductBarcode(productBarcode2);
         secondBoxNumber.setBoxNumber(boxNumberValue);
-        secondBoxNumber.setLastUpdated(LocalDateTime.now());
+        secondBoxNumber.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         boxNumberRepository.save(secondBoxNumber);
         
         // Create log entry for the second barcode
@@ -1964,7 +1966,7 @@ public class StockService {
                 stock.setBoxBarcode(boxBarcode);
                 stock.setProductName(productName);
                 stock.setQuantity(actualQuantity);
-                stock.setLastUpdated(LocalDateTime.now());
+                stock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
                 
                 // Update box number if available
                 Integer highestBoxNumber = boxNumberService.getHighestBoxNumber(boxBarcode, productName);
@@ -2022,7 +2024,7 @@ public class StockService {
             CurrentStock stock = currentStockRepository.findByBoxBarcodeAndProductName(boxBarcode, productName)
                     .orElseThrow(() -> new ResourceNotFoundException("Stock not found for box barcode: " + boxBarcode));
             stock.setQuantity(stock.getQuantity() + quantity);
-            stock.setLastUpdated(LocalDateTime.now());
+            stock.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
             currentStockRepository.save(stock);
 
             // Log with correct quantity

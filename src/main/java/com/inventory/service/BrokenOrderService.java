@@ -13,7 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +62,7 @@ public class BrokenOrderService {
             if (!brokenIdRepository.findById(brokenOrderId).isPresent()) {
                 BrokenId brokenId = new BrokenId();
                 brokenId.setBrokenId(brokenOrderId);
-                brokenId.setTimestamp(LocalDateTime.now());
+                brokenId.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
                 brokenId.setNote(orderDTO.getNote());
                 
                 // Save the broken ID record

@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
 @RestController
 @RequestMapping("/api/debug")
@@ -25,7 +27,7 @@ public class DebugController {
         sale.setEmployeeId("TEST");
         sale.setShopName("Test Shop");
         sale.setOrderId("TEST-ORDER-" + System.currentTimeMillis());
-        sale.setTimestamp(LocalDateTime.now());
+        sale.setTimestamp(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         sale.setQuantity(1);
         
         // Set note to test behavior with lent items

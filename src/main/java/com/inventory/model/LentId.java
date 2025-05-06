@@ -2,7 +2,7 @@ package com.inventory.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Entity class for lent_id table
@@ -25,7 +25,7 @@ public class LentId {
     private String shopName;
     
     @Column(name = "timestamp", nullable = false)
-    private LocalDateTime timestamp;
+    private ZonedDateTime timestamp;
     
     @Column(name = "note")
     private String note;

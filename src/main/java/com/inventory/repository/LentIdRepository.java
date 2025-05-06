@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Repository
@@ -47,7 +48,7 @@ public interface LentIdRepository extends JpaRepository<LentId, String> {
     /**
      * Find lent IDs by timestamp between start and end time
      */
-    List<LentId> findByTimestampBetween(LocalDateTime startTime, LocalDateTime endTime);
+    List<LentId> findByTimestampBetween(ZonedDateTime startTime, ZonedDateTime endTime);
 
     /**
      * Search lent IDs by terms in lentId, employeeId, or shopName

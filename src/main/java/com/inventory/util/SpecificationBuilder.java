@@ -1,7 +1,7 @@
 package com.inventory.util;
 
 import org.springframework.data.jpa.domain.Specification;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Utility class for building JPA specifications for dynamic filtering
@@ -80,7 +80,7 @@ public class SpecificationBuilder {
     /**
      * Create a specification for date between condition
      */
-    public static <T> Specification<T> dateBetween(String fieldName, LocalDateTime startDate, LocalDateTime endDate) {
+    public static <T> Specification<T> dateBetween(String fieldName, ZonedDateTime startDate, ZonedDateTime endDate) {
         return between(fieldName, startDate, endDate);
     }
 } 

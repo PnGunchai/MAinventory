@@ -5,6 +5,7 @@ import { productApi } from '@/services/api';
 import { debounce } from 'lodash';
 import { useAuthStore } from '@/store/authStore';
 import { useTranslation } from 'react-i18next';
+import { formatDateTime } from '@/utils/dateUtils';
 
 export default function Stock() {
   const { i18n, t } = useTranslation();
@@ -314,11 +315,14 @@ export default function Stock() {
     i18n.changeLanguage(newLang);
   };
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-black">{t('currentStock')}</h1>
-        {hasPermission('canAddStock') && (
+        {mounted && hasPermission('canAddStock') && (
           <div className="space-x-4">
             <button
               onClick={() => {
@@ -356,7 +360,7 @@ export default function Stock() {
       </div>
 
       {/* Add Stock Modal */}
-      {showAddPage && (
+      {mounted && showAddPage && (
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -494,7 +498,7 @@ export default function Stock() {
       )}
 
       {/* Remove Stock Modal */}
-      {showRemovePage && (
+      {mounted && showRemovePage && (
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -668,7 +672,7 @@ export default function Stock() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {loading ? (
+              {!mounted || loading ? (
                 <tr>
                   <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
                     {t('loading')}
@@ -706,7 +710,7 @@ export default function Stock() {
                       {item.totalQuantity}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900">
-                      {new Date(item.lastUpdated).toLocaleString()}
+                      {formatDateTime(item.lastUpdated)}
                     </td>
                   </tr>
                 ))

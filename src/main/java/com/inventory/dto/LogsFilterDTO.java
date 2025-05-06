@@ -3,7 +3,8 @@ package com.inventory.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import jakarta.validation.constraints.*;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * DTO for filtering logs
@@ -23,11 +24,13 @@ public class LogsFilterDTO {
     @Schema(description = "Operation type to filter by")
     private String operation;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX", timezone = "Asia/Bangkok")
     @Schema(description = "Start date for date range filter (ISO format)")
-    private LocalDateTime startDate;
+    private ZonedDateTime startDate;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX", timezone = "Asia/Bangkok")
     @Schema(description = "End date for date range filter (ISO format)")
-    private LocalDateTime endDate;
+    private ZonedDateTime endDate;
 
     @Schema(description = "Box number to filter by")
     private Integer boxNumber;

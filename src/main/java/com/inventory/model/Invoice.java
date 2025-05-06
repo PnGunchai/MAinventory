@@ -2,7 +2,8 @@ package com.inventory.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
 /**
  * Entity class for invoice table
@@ -28,10 +29,10 @@ public class Invoice {
     private String shopName;
     
     @Column(name = "timestamp")
-    private LocalDateTime timestamp;
+    private ZonedDateTime timestamp;
 
     @Column(name = "last_modified")
-    private LocalDateTime lastModified;
+    private ZonedDateTime lastModified;
 
     @Column(name = "edit_count")
     private Integer editCount = 0;
@@ -48,7 +49,7 @@ public class Invoice {
      * @param details Description of what was changed
      */
     public void addEditHistory(String operation, String details) {
-        LocalDateTime now = LocalDateTime.now();
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Bangkok"));
         String newEdit = String.format("[%s] %s: %s", now, operation, details);
         
         if (editHistory == null || editHistory.isEmpty()) {

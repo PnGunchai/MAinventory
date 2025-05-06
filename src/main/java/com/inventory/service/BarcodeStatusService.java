@@ -13,7 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
 /**
  * Service for managing barcode status
@@ -42,7 +43,7 @@ public class BarcodeStatusService {
         
         status.setProductBarcode(barcode);
         status.setStatus("IN_USE");
-        status.setLastUpdated(LocalDateTime.now());
+        status.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         
         barcodeStatusRepository.save(status);
     }
@@ -63,7 +64,7 @@ public class BarcodeStatusService {
         
         status.setProductBarcode(barcode);
         status.setStatus("AVAILABLE");
-        status.setLastUpdated(LocalDateTime.now());
+        status.setLastUpdated(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
         
         barcodeStatusRepository.save(status);
     }

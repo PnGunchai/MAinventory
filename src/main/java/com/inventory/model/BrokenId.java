@@ -2,7 +2,7 @@ package com.inventory.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Entity class for broken_id table
@@ -18,7 +18,7 @@ public class BrokenId {
     private String brokenId;
     
     @Column(name = "timestamp", nullable = false)
-    private LocalDateTime timestamp;
+    private ZonedDateTime timestamp;
     
     @Column(name = "note")
     private String note;

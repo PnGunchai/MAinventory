@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -99,7 +100,7 @@ class StockServiceTest {
         stock.setProductName("Test Product");
         stock.setQuantity(quantity);
         stock.setBoxNumber(1); // Changed to Integer
-        stock.setLastUpdated(LocalDateTime.now());
+        stock.setLastUpdated(ZonedDateTime.now());
         
         when(productCatalogRepository.findById(boxBarcode)).thenReturn(Optional.of(product));
         when(currentStockRepository.findByBoxBarcodeAndProductName(any(), any())).thenReturn(Optional.empty());
