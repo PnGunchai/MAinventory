@@ -207,5 +207,6 @@
   "noOrdersFound": "ไม่พบออเดอร์",
   "addedDate": "วันที่เพิ่ม",
   "optional": "ไม่จำเป็น",
-  "units": "หน่วย"
+  "units": "หน่วย",
+  "noItemsFound": "ไม่พบรายการ"
 } 

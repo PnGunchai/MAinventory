@@ -193,5 +193,6 @@
   "returned": "Returned",
   "processed": "Processed",
   "lent to sales": "Lent to Sales",
-  "units": "Units"
+  "units": "Units",
+  "noItemsFound": "No items found"
 } 
