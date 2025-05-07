@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '@/components/Button';
