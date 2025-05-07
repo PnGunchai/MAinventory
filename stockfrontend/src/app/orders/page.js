@@ -3,11 +3,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { orderApi } from '@/services/api';
 import { useAuthStore } from '@/store/authStore';
 import NewOrderModal from './NewOrderModal';
-import NewBrokenOrderModal from './NewBrokenOrderModal';
 import EditOrderModal from '../../components/EditOrderModal';
 import AddItemsModal from '../../components/AddItemsModal';
 import { useTranslation } from 'react-i18next';
 import { formatDateTime } from '@/utils/dateUtils';
+import Button from '@/components/Button';
 
 // Debounce helper function
 function debounce(func, wait) {
@@ -35,7 +35,6 @@ export default function Orders() {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [showNewOrderModal, setShowNewOrderModal] = useState(false);
-  const [showNewBrokenOrderModal, setShowNewBrokenOrderModal] = useState(false);
   const [sortField, setSortField] = useState('timestamp');
   const [sortDirection, setSortDirection] = useState('desc');
 
@@ -338,12 +337,10 @@ export default function Orders() {
   }, [currentPage, activeTab, sortField, sortDirection, debouncedSearchTerm]);
 
   // Handle modal close
-  const handleModalClose = (success) => {
+  const handleModalClose = (shouldRefresh = false) => {
     setShowNewOrderModal(false);
-    if (success) {
-      // Refresh the orders list
-      setCurrentPage(0); // Reset to first page
-      setLoading(true); // This will trigger a refresh via useEffect
+    if (shouldRefresh) {
+      refreshOrders();
     }
   };
 
@@ -417,12 +414,12 @@ export default function Orders() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-black">{t('orders')}</h1>
         {mounted && hasPermission('canCreateOrder') && (
-          <button 
+          <Button 
             onClick={() => setShowNewOrderModal(true)}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             {t('createOrder')}
-          </button>
+          </Button>
         )}
       </div>
 
@@ -432,23 +429,11 @@ export default function Orders() {
         onClose={handleModalClose} 
       />
 
-      {/* New Broken Order Modal */}
-      <NewBrokenOrderModal
-        isOpen={showNewBrokenOrderModal}
-        onClose={(success) => {
-          setShowNewBrokenOrderModal(false);
-          if (success) {
-            setCurrentPage(0);
-            setLoading(true);
-          }
-        }}
-      />
-
       {/* Order Type Tabs */}
       <div className="bg-white shadow-md rounded-lg border border-gray-300">
         <div className="border-b border-gray-300">
           <nav className="-mb-px flex space-x-8 px-4" aria-label="Tabs">
-            <button 
+            <Button 
               onClick={() => setActiveTab('sales')}
               className={`${
                 activeTab === 'sales'
@@ -457,8 +442,8 @@ export default function Orders() {
               } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
             >
               {t('salesOrders')}
-            </button>
-            <button 
+            </Button>
+            <Button 
               onClick={() => setActiveTab('lent')}
               className={`${
                 activeTab === 'lent'
@@ -467,7 +452,7 @@ export default function Orders() {
               } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
             >
               {t('lentOrders')}
-            </button>
+            </Button>
           </nav>
         </div>
 
@@ -605,27 +590,27 @@ export default function Orders() {
                       )}
                       <td className="px-6 py-4 text-sm text-gray-500">
                         <div className="flex gap-2">
-                          <button
+                          <Button
                             onClick={() => handleViewClick(order)}
                             className="text-blue-600 hover:text-blue-900"
                           >
                             {t('view')}
-                          </button>
+                          </Button>
                           {mounted && hasPermission('canCreateOrder') && activeTab === 'sales' && (
-                            <button
+                            <Button
                               onClick={() => handleEditClick(order)}
                               className="text-green-600 hover:text-green-900"
                             >
                               {t('edit')}
-                            </button>
+                            </Button>
                           )}
                           {mounted && hasPermission('canCreateOrder') && activeTab === 'lent' && order.status === 'active' && (
-                            <button
+                            <Button
                               onClick={() => handleProcessClick(order)}
                               className="text-yellow-600 hover:text-yellow-900"
                             >
                               {t('process')}
-                            </button>
+                            </Button>
                           )}
                         </div>
                       </td>
@@ -643,7 +628,7 @@ export default function Orders() {
                   {t('showingPage')} {currentPage + 1} {t('of')} {totalPages} ({totalElements} {t('totalOrders')})
                 </p>
                 <div className="space-x-2">
-                  <button
+                  <Button
                     onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
                     disabled={currentPage === 0}
                     className={`px-4 py-2 border rounded-md text-sm font-medium ${
@@ -653,8 +638,8 @@ export default function Orders() {
                     }`}
                   >
                     {t('previous')}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
                     disabled={currentPage === totalPages - 1}
                     className={`px-4 py-2 border rounded-md text-sm font-medium ${
@@ -664,7 +649,7 @@ export default function Orders() {
                     }`}
                   >
                     {t('next')}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -836,19 +821,19 @@ export default function Orders() {
               </div>
 
               <div className="flex justify-end space-x-4 mt-4">
-                <button
+                <Button
                   onClick={() => handleProcessModalClose(false)}
                   className="bg-white text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md border"
                 >
                   {t('cancel')}
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleProcessItems}
                   disabled={!processingItems.some(item => item.status === 'lent')}
                   className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {t('processItems')}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -861,12 +846,12 @@ export default function Orders() {
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl border border-gray-300">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-medium text-gray-900">{activeTab === 'sales' ? t('salesOrderDetails') : t('lentOrderDetails')}</h3>
-              <button
+              <Button
                 onClick={handleViewModalClose}
                 className="text-gray-900 hover:text-gray-700"
               >
                 ×
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-4">
@@ -958,12 +943,12 @@ export default function Orders() {
               </div>
 
               <div className="flex justify-end mt-4">
-                <button
+                <Button
                   onClick={handleViewModalClose}
                   className="bg-white text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md border"
                 >
                   {t('close')}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

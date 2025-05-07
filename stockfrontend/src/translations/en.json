@@ -191,5 +191,6 @@
   "processed": "Processed",
   "lent to sales": "Lent to Sales",
   "units": "Units",
-  "noItemsFound": "No items found"
+  "noItemsFound": "No items found",
+  "enterInvoiceNumberForSales": "Enter invoice number for sales"
 } 

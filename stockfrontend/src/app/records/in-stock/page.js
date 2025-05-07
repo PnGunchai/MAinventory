@@ -4,9 +4,13 @@ import { useState, useEffect } from 'react';
 import { inStockApi } from '@/services/api';
 import { formatDateTime } from '@/utils/dateUtils';
 import { useTranslation } from 'react-i18next';
+import Button from '@/components/Button';
+import { productApi } from '@/services/api';
+import { useRouter } from 'next/navigation';
 
 export default function InStockPage() {
     const { t } = useTranslation();
+    const router = useRouter();
     const [inStockItems, setInStockItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -15,6 +19,7 @@ export default function InStockPage() {
     const [pageSize, setPageSize] = useState(20);
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         fetchInStockItems({ page: 0 });
@@ -25,6 +30,8 @@ export default function InStockPage() {
         fetchInStockItems();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page]);
+
+    useEffect(() => setMounted(true), []);
 
     const fetchInStockItems = async (opts = {}) => {
         try {
@@ -45,6 +52,42 @@ export default function InStockPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleExport = async () => {
+        try {
+            setLoading(true);
+            const response = await productApi.exportInStockRecords();
+            
+            // Create a blob from the response data
+            const blob = new Blob([response], { type: 'text/csv' });
+            
+            // Create a download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            
+            // Set filename
+            const filename = 'in_stock_records.csv';
+            link.setAttribute('download', filename);
+            
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            
+            // Cleanup
+            link.parentNode.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error exporting records:', error);
+            setError(error.message || t('failedToExportRecords'));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCancel = () => {
+        router.back();
     };
 
     if (error) {
@@ -141,20 +184,20 @@ export default function InStockPage() {
                             <option value="100">{t('perPage100') || '100 / page'}</option>
                         </select>
                         <div className="space-x-2">
-                            <button
+                            <Button
                                 className="px-3 py-1 border rounded text-gray-900 hover:bg-gray-50"
                                 onClick={() => setPage(Math.max(0, page - 1))}
                                 disabled={page === 0 || loading}
                             >
                                 {t('previous')}
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 className="px-3 py-1 border rounded text-gray-900 hover:bg-gray-50"
                                 onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
                                 disabled={page >= totalPages - 1 || loading}
                             >
                                 {t('next')}
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

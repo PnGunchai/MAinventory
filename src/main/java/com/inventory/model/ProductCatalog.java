@@ -4,7 +4,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 import lombok.Data;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 /**
  * Entity class for product_catalog table
@@ -24,6 +28,10 @@ public class ProductCatalog {
     
     @Column(name = "number_sn", nullable = false)
     private Integer numberSn;
+    
+    @JsonManagedReference
+    @OneToMany(mappedBy = "productCatalog", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CurrentStock> currentStocks;
     
     /**
      * Override the generated getter to handle null values

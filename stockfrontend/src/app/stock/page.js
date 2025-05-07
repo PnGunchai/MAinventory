@@ -6,6 +6,7 @@ import { debounce } from 'lodash';
 import { useAuthStore } from '@/store/authStore';
 import { useTranslation } from 'react-i18next';
 import { formatDateTime } from '@/utils/dateUtils';
+import Button from '@/components/Button';
 
 export default function Stock() {
   const { i18n, t } = useTranslation();
@@ -142,6 +143,7 @@ export default function Stock() {
   // Handle add stock form submission
   const handleAddStock = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     setFormError(null);
     setAddProcessing(true);
 
@@ -169,9 +171,17 @@ export default function Stock() {
     }
   };
 
+  // Add keydown handler to prevent form submission on Enter
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  };
+
   // Handle remove stock form submission
   const handleRemoveStock = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     setFormError(null);
     setRemoveProcessing(true);
 
@@ -301,26 +311,26 @@ export default function Stock() {
         <h1 className="text-3xl font-bold text-black">{t('currentStock')}</h1>
         {mounted && hasPermission('canAddStock') && (
           <div className="space-x-4">
-            <button
+            <Button
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
               onClick={() => {
                 setShowAddPage(true);
                 setShowRemovePage(false);
                 setFormError(null);
               }}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
             >
               {t('add')} (+)
-            </button>
-            <button
+            </Button>
+            <Button
+              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
               onClick={() => {
                 setShowRemovePage(true);
                 setShowAddPage(false);
                 setFormError(null);
               }}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
             >
               {t('remove')} (-)
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -346,15 +356,15 @@ export default function Stock() {
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold text-black">{t('addStock')}</h2>
-                  <button
+                  <Button
+                    className="text-gray-500 hover:text-gray-700"
                     onClick={() => {
                       setShowAddPage(false);
                       setFormError(null);
                     }}
-                    className="text-gray-500 hover:text-gray-700"
                   >
                     ✕
-                  </button>
+                  </Button>
                 </div>
                 
                 {formError && (
@@ -363,7 +373,7 @@ export default function Stock() {
                   </div>
                 )}
 
-                <form onSubmit={handleAddStock}>
+                <form onSubmit={handleAddStock} onKeyDown={handleKeyDown}>
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">{t('boxBarcode')}</label>
                     <input
@@ -404,23 +414,21 @@ export default function Stock() {
                           className="flex-1 px-3 py-2 rounded-lg border-2 border-gray-300 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                         />
                         {index > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => removeProductBarcodeField(index)}
+                          <Button
                             className="px-3 py-2 text-red-600 hover:text-red-800"
+                            onClick={() => removeProductBarcodeField(index)}
                           >
                             ✕
-                          </button>
+                          </Button>
                         )}
                       </div>
                     ))}
-                    <button
-                      type="button"
-                      onClick={addProductBarcodeField}
+                    <Button
                       className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                      onClick={addProductBarcodeField}
                     >
                       + {t('addMoreItems')}
-                    </button>
+                    </Button>
                   </div>
 
                   <div className="mb-4">
@@ -448,24 +456,23 @@ export default function Stock() {
                   </div>
 
                   <div className="mt-6 flex justify-end space-x-3">
-                    <button
-                      type="button"
+                    <Button
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                       onClick={() => {
                         setShowAddPage(false);
                         setFormError(null);
                       }}
-                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                       disabled={addProcessing}
                     >
                       {t('cancel')}
-                    </button>
-                    <button
-                      type="submit"
+                    </Button>
+                    <Button
                       className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+                      type="submit"
                       disabled={addProcessing}
                     >
                       {addProcessing ? t('adding') : t('addStock')}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               </div>
@@ -484,15 +491,15 @@ export default function Stock() {
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold text-black">{t('removeStock')}</h2>
-                  <button
+                  <Button
+                    className="text-gray-500 hover:text-gray-700"
                     onClick={() => {
                       setShowRemovePage(false);
                       setFormError(null);
                     }}
-                    className="text-gray-500 hover:text-gray-700"
                   >
                     ✕
-                  </button>
+                  </Button>
                 </div>
 
                 {formError && (
@@ -501,7 +508,7 @@ export default function Stock() {
                   </div>
                 )}
 
-                <form onSubmit={handleRemoveStock}>
+                <form onSubmit={handleRemoveStock} onKeyDown={handleKeyDown}>
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">{t('boxBarcode')}</label>
                     <input
@@ -542,23 +549,21 @@ export default function Stock() {
                           className="flex-1 px-3 py-2 rounded-lg border-2 border-gray-300 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                         />
                         {index > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => removeRemoveProductBarcodeField(index)}
+                          <Button
                             className="px-3 py-2 text-red-600 hover:text-red-800"
+                            onClick={() => removeRemoveProductBarcodeField(index)}
                           >
                             ✕
-                          </button>
+                          </Button>
                         )}
                       </div>
                     ))}
-                    <button
-                      type="button"
-                      onClick={addRemoveProductBarcodeField}
+                    <Button
                       className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                      onClick={addRemoveProductBarcodeField}
                     >
                       + {t('addMoreItems')}
-                    </button>
+                    </Button>
                   </div>
 
                   <div className="mb-4">
@@ -586,24 +591,23 @@ export default function Stock() {
                   </div>
 
                   <div className="mt-6 flex justify-end space-x-3">
-                    <button
-                      type="button"
+                    <Button
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                       onClick={() => {
                         setShowRemovePage(false);
                         setFormError(null);
                       }}
-                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                       disabled={removeProcessing}
                     >
                       {t('cancel')}
-                    </button>
-                    <button
-                      type="submit"
+                    </Button>
+                    <Button
                       className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                      type="submit"
                       disabled={removeProcessing}
                     >
                       {removeProcessing ? t('removing') : t('removeStock')}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               </div>
@@ -714,20 +718,20 @@ export default function Stock() {
               <option value="100">{t('perPage100') || '100 / page'}</option>
             </select>
             <div className="space-x-2">
-              <button
+              <Button
                 className="px-3 py-1 border rounded text-gray-900 hover:bg-gray-50"
                 onClick={() => setPage(Math.max(0, page - 1))}
                 disabled={page === 0 || loading}
               >
                 {t('previous')}
-              </button>
-              <button
+              </Button>
+              <Button
                 className="px-3 py-1 border rounded text-gray-900 hover:bg-gray-50"
                 onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
                 disabled={page >= totalPages - 1 || loading}
               >
                 {t('next')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

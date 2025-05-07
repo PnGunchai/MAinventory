@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { orderApi } from '../services/api';
 import AddItemsModal from './AddItemsModal';
 import { useTranslation } from 'react-i18next';
+import Button from './Button';
+import { X } from 'lucide-react';
 
 export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated }) {
   const { t } = useTranslation();
@@ -114,12 +116,12 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
       <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-lg bg-white">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">{t('editOrder')} #{order.orderId}</h2>
-          <button
-            onClick={onClose}
+          <Button
             className="text-gray-500 hover:text-gray-700"
+            onClick={onClose}
           >
-            ✕
-          </button>
+            <X className="h-6 w-6" />
+          </Button>
         </div>
 
         {error && (
@@ -131,12 +133,12 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
         <div className="border-t pt-4">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-lg font-medium text-gray-900">{t('items')}</h3>
-            <button
+            <Button
               onClick={handleAddItemsClick}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
               {t('addItems')}
-            </button>
+            </Button>
           </div>
 
           {loading ? (
@@ -167,12 +169,12 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
                         {item.productBarcode ? item.productBarcode : `${item.quantity} ${t('units')}`}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <button
+                        <Button
                           onClick={() => handleRemoveItem(item.productBarcode, item.boxBarcode, item.quantity, item.productName)}
                           className="text-red-600 hover:text-red-800"
                         >
                           ✕
-                        </button>
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -191,19 +193,19 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
             placeholder={t('addNewNote')}
           />
           <div className="flex justify-end space-x-3 pt-4">
-            <button
+            <Button
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
               {t('cancel')}
-            </button>
-            <button
-              onClick={handleUpdateNotes}
+            </Button>
+            <Button
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              onClick={handleUpdateNotes}
               disabled={!newNote.trim()}
             >
               {t('addNote')}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -233,18 +235,18 @@ export default function EditOrderModal({ isOpen, onClose, order, onOrderUpdated 
                 {t('confirmDeleteWarning')}
               </p>
               <div className="flex justify-end space-x-4">
-                <button
-                  onClick={handleDeleteCancel}
+                <Button
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                  onClick={handleDeleteCancel}
                 >
                   {t('cancel')}
-                </button>
-                <button
-                  onClick={handleDeleteConfirm}
+                </Button>
+                <Button
                   className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md"
+                  onClick={handleDeleteConfirm}
                 >
                   {t('delete')}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

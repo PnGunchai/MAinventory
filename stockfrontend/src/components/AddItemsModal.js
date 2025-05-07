@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { orderApi } from '../services/api';
 import { useTranslation } from 'react-i18next';
+import Button from './Button';
+import { X } from 'lucide-react';
 
 export default function AddItemsModal({ isOpen, onClose, orderId, onItemsAdded }) {
   const { t } = useTranslation();
@@ -110,12 +112,12 @@ export default function AddItemsModal({ isOpen, onClose, orderId, onItemsAdded }
       <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-lg bg-white">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">{t('addItems')}</h2>
-          <button
-            onClick={onClose}
+          <Button
             className="text-gray-500 hover:text-gray-700"
+            onClick={onClose}
           >
-            ✕
-          </button>
+            <X className="h-6 w-6" />
+          </Button>
         </div>
 
         {error && (
@@ -128,12 +130,12 @@ export default function AddItemsModal({ isOpen, onClose, orderId, onItemsAdded }
         <div className="border-t pt-4">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-lg font-medium text-gray-900">{t('nonSerializedItems')}</h3>
-            <button
+            <Button
               onClick={() => setNonSerializedItems([])}
               className="text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
               {t('removeSection')}
-            </button>
+            </Button>
           </div>
           {nonSerializedItems.map((item, index) => (
             <div key={index} className="flex gap-3 items-start bg-gray-50 p-3 rounded-lg mb-3">
@@ -155,32 +157,32 @@ export default function AddItemsModal({ isOpen, onClose, orderId, onItemsAdded }
                   className="w-full rounded-lg border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900"
                 />
               </div>
-              <button
+              <Button
                 onClick={() => handleRemoveNonSerializedItem(index)}
                 className="text-red-600 hover:text-red-800"
               >
                 ✕
-              </button>
+              </Button>
             </div>
           ))}
-          <button
+          <Button
             onClick={handleAddNonSerializedItem}
             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
           >
             {t('addItem')}
-          </button>
+          </Button>
         </div>
 
         {/* Serialized Items Section */}
         <div className="border-t pt-4 mt-4">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-lg font-medium text-gray-900">{t('serializedItems')}</h3>
-            <button
+            <Button
               onClick={() => setSerializedGroups([])}
               className="text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
               {t('removeSection')}
-            </button>
+            </Button>
           </div>
           {serializedGroups.map((group, groupIndex) => (
             <div key={groupIndex} className="bg-gray-50 p-4 rounded-lg mb-4">
@@ -197,12 +199,12 @@ export default function AddItemsModal({ isOpen, onClose, orderId, onItemsAdded }
                     placeholder={t('boxBarcode')}
                   />
                 </div>
-                <button
+                <Button
                   onClick={() => handleRemoveSerializedGroup(groupIndex)}
                   className="text-red-600 hover:text-red-800"
                 >
                   Remove Group
-                </button>
+                </Button>
               </div>
               {group.productBarcodes.map((barcode, barcodeIndex) => (
                 <div key={barcodeIndex} className="flex gap-3 items-start pl-4 border-l-2 border-gray-200 mt-3">
@@ -218,45 +220,45 @@ export default function AddItemsModal({ isOpen, onClose, orderId, onItemsAdded }
                       placeholder="Product Barcode"
                     />
                   </div>
-                  <button
+                  <Button
                     onClick={() => handleRemoveProductBarcode(groupIndex, barcodeIndex)}
                     className="text-red-600 hover:text-red-800"
                   >
                     Remove
-                  </button>
+                  </Button>
                 </div>
               ))}
-              <button
+              <Button
                 onClick={() => handleAddProductBarcode(groupIndex)}
                 className="ml-4 text-blue-600 hover:text-blue-800 text-sm mt-3"
               >
                 + Add Product Barcode
-              </button>
+              </Button>
             </div>
           ))}
-          <button
+          <Button
             onClick={handleAddSerializedGroup}
             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
           >
             + Add Group
-          </button>
+          </Button>
         </div>
 
         <div className="flex justify-end space-x-3 pt-4 mt-4 border-t">
-          <button
+          <Button
+            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
           >
-            Cancel
-          </button>
-          <button
+            {t('cancel')}
+          </Button>
+          <Button
             onClick={handleSubmit}
             disabled={loading}
             className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 
               ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {loading ? 'Adding...' : 'Add Items'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

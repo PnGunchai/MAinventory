@@ -18,5 +18,7 @@ public interface ProductCatalogRepository extends JpaRepository<ProductCatalog, 
            "LOWER(p.boxBarcode) LIKE LOWER(CONCAT('%', :search, '%'))")
     Page<ProductCatalog> searchProducts(@Param("search") String search, Pageable pageable);
 
+    boolean existsByProductNameIgnoreCase(String productName);
+
     // Custom query methods can be added here
 } 

@@ -39,6 +39,20 @@ public class ProductService {
      */
     @Transactional
     public ProductCatalog addProduct(String boxBarcode, String productName, Integer numberSn) {
+        // Validate inputs
+        if (boxBarcode == null || boxBarcode.trim().isEmpty()) {
+            throw new InvalidInputException("Box barcode cannot be blank");
+        }
+        
+        if (productName == null || productName.trim().isEmpty()) {
+            throw new InvalidInputException("Product name cannot be blank");
+        }
+        
+        // Check for duplicate product name
+        if (productCatalogRepository.existsByProductNameIgnoreCase(productName)) {
+            throw new InvalidInputException("A product with this name already exists");
+        }
+        
         // Validate numberSn
         validateNumberSn(numberSn);
         

@@ -1,6 +1,7 @@
 import React from 'react';
 import { SplitDestinationInput } from './SplitDestinationInput';
 import { useTranslation } from 'react-i18next';
+import Button from '@/components/Button';
 
 export const DestinationSelector = ({
     identifier,
@@ -27,7 +28,7 @@ export const DestinationSelector = ({
                 />
             ) : (
                 <div className="flex space-x-4">
-                    <button
+                    <Button
                         onClick={() => handleSingleDestinationChange('return')}
                         className={`px-4 py-2 rounded-md ${
                             initialDestination?.destination === 'return'
@@ -36,8 +37,8 @@ export const DestinationSelector = ({
                         }`}
                     >
                         {t('return')}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={() => handleSingleDestinationChange('sales')}
                         className={`px-4 py-2 rounded-md ${
                             initialDestination?.destination === 'sales'
@@ -46,8 +47,8 @@ export const DestinationSelector = ({
                         }`}
                     >
                         {t('sales')}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={() => handleSingleDestinationChange('broken')}
                         className={`px-4 py-2 rounded-md ${
                             initialDestination?.destination === 'broken'
@@ -56,7 +57,7 @@ export const DestinationSelector = ({
                         }`}
                     >
                         {t('broken')}
-                    </button>
+                    </Button>
                 </div>
             )}
         </div>

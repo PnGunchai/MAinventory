@@ -2,6 +2,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { productApi, orderApi } from '@/services/api';
 import { useTranslation } from 'react-i18next';
+import Button from '@/components/Button';
+import { X } from 'lucide-react';
 
 // Debounce helper function
 function debounce(func, wait) {
@@ -328,7 +330,8 @@ export default function NewOrderModal({ isOpen, onClose }) {
         response = await orderApi.createLentOrder(requestData);
       }
 
-      onClose();
+      // Call onClose with true to indicate successful creation
+      onClose(true);
     } catch (error) {
       console.error('Error creating order:', error);
       // Prefer backend error message if available
@@ -412,12 +415,12 @@ export default function NewOrderModal({ isOpen, onClose }) {
       <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-lg bg-white">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">{t('newOrder')}</h2>
-          <button
-            onClick={() => onClose(false)}
+          <Button
             className="text-gray-500 hover:text-gray-700"
+            onClick={() => onClose(false)}
           >
-            ✕
-          </button>
+            <X className="h-6 w-6" />
+          </Button>
         </div>
 
         {error && (
@@ -428,7 +431,7 @@ export default function NewOrderModal({ isOpen, onClose }) {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex gap-4 justify-start">
-            <button
+            <Button
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, destination: 'sales' }))}
               className={`px-6 py-2 rounded-md font-medium transition-colors duration-200 ${
@@ -438,8 +441,8 @@ export default function NewOrderModal({ isOpen, onClose }) {
               }`}
             >
               {t('sale')}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, destination: 'lent' }))}
               className={`px-6 py-2 rounded-md font-medium transition-colors duration-200 ${
@@ -449,7 +452,7 @@ export default function NewOrderModal({ isOpen, onClose }) {
               }`}
             >
               {t('lent')}
-            </button>
+            </Button>
           </div>
 
           <div>
@@ -638,23 +641,23 @@ export default function NewOrderModal({ isOpen, onClose }) {
                           </button>
                         </div>
                       ))}
-                      <button
+                      <Button
                         type="button"
                         onClick={() => addItemToGroup(groupIndex)}
                         className="ml-4 text-blue-600 hover:text-blue-800 text-sm"
                       >
                         + {t('addProductBarcode')}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))}
-                <button
+                <Button
                   type="button"
                   onClick={addSerialGroup}
                   className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                 >
                   + {t('addGroup')}
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -672,21 +675,19 @@ export default function NewOrderModal({ isOpen, onClose }) {
           </div>
 
           <div className="flex justify-end space-x-3 pt-4">
-            <button
-              type="button"
+            <Button
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
               onClick={() => onClose(false)}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
               {t('cancel')}
-            </button>
-            <button
-              type="submit"
+            </Button>
+            <Button
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              onClick={handleSubmit}
               disabled={loading}
-              className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 
-                ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {loading ? t('creating') : t('createOrder')}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

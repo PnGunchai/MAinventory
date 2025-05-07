@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { recordsApi } from '@/services/api';
 import { useTranslation } from 'react-i18next';
 import { formatDateTime } from '@/utils/dateUtils';
+import Button from '@/components/Button';
 
 export default function Records() {
   const { i18n, t } = useTranslation();
@@ -139,7 +140,7 @@ export default function Records() {
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8 px-4" aria-label="Tabs">
             {['all', 'sales', 'lent'].map((tab) => (
-              <button
+              <Button
                 key={tab}
                 onClick={() => {
                   setActiveTab(tab);
@@ -152,7 +153,7 @@ export default function Records() {
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm capitalize`}
               >
                 {tab === 'all' ? t('allRecords') : t(tab)}
-              </button>
+              </Button>
             ))}
           </nav>
         </div>
@@ -298,7 +299,7 @@ export default function Records() {
               </p>
             </div>
             <div className="flex gap-2">
-              <button
+              <Button
                 onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
                 disabled={currentPage === 0}
                 className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
@@ -308,8 +309,8 @@ export default function Records() {
                 }`}
               >
                 {t('previous')}
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
                 disabled={currentPage >= totalPages - 1}
                 className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
@@ -319,7 +320,7 @@ export default function Records() {
                 }`}
               >
                 {t('next')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

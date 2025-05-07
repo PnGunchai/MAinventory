@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
+import React from 'react';
+import Button from './Button';
+import { X, Menu, LogOut } from 'lucide-react';
 
 export default function Navigation({ onClose }) {
   const { t, i18n } = useTranslation();
@@ -51,15 +54,12 @@ export default function Navigation({ onClose }) {
       {onClose && (
         <div className="flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200 md:hidden">
           <span className="text-xl font-semibold text-black">{t('stockManager')}</span>
-          <button
-            aria-label="Close sidebar"
+          <Button
+            className="text-gray-500 hover:text-gray-600"
             onClick={onClose}
-            className="text-gray-700 focus:outline-none"
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            <X className="h-6 w-6" />
+          </Button>
         </div>
       )}
       {/* Logo (desktop only) */}
@@ -116,36 +116,23 @@ export default function Navigation({ onClose }) {
 
       {/* Language Switcher */}
       <div className="px-4 pb-2">
-        <button
+        <Button
           onClick={toggleLanguage}
           className="w-full px-4 py-2 mb-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md font-semibold"
         >
           {`Language: ${i18n.language === 'en' ? 'EN' : 'TH'}`}
-        </button>
+        </Button>
       </div>
 
       {/* Logout Button */}
       <div className="p-4 border-t border-gray-200">
-        <button
-          onClick={() => { handleLogout(); if (onClose) onClose(); }}
+        <Button
           className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 rounded-md flex items-center"
+          onClick={handleLogout}
         >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-5 w-5 mr-2" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" 
-            />
-          </svg>
+          <LogOut className="h-6 w-6 mr-2" />
           {t('logout')}
-        </button>
+        </Button>
       </div>
     </div>
   );

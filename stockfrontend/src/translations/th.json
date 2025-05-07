@@ -167,7 +167,7 @@
   "processLentOrder": "ดำเนินการออเดอร์ยืม",
   "activeItems": "รายการที่ยังใช้งาน",
   "infoAboutAutomaticReturns": "สำหรับสินค้าที่ไม่มีซีเรียล โปรดระบุจำนวนที่จะขาย ส่วนที่เหลือจะถูกคืนเข้าสต็อกโดยอัตโนมัติ",
-  "enterInvoiceNumberForSales": "กรอกเลขที่ใบแจ้งหนี้สำหรับขาย",
+  "enterInvoiceNumberForSales": "กรอกเลขที่ใบอินวอยซ์สำหรับขาย",
   "loadingItems": "กำลังโหลดรายการ...",
   "editHistory": "ประวัติการแก้ไข",
   "noItemsFound": "ไม่พบรายการ",

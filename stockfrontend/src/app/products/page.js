@@ -1,11 +1,24 @@
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import Button from '@/components/Button';
+
 export default function Products() {
+  const { t } = useTranslation();
+
+  const handleAddProduct = () => {
+    // Implementation of add product function
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-black">Products</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-          Add Product
-        </button>
+        <h1 className="text-3xl font-bold text-black">{t('products')}</h1>
+        <Button 
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          onClick={handleAddProduct}
+        >
+          {t('addProduct')}
+        </Button>
       </div>
 
       {/* Products Table */}

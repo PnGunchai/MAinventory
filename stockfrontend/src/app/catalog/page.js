@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { productApi } from '@/services/api';
 import { useTranslation } from 'react-i18next';
+import Button from '@/components/Button';
 
 export default function Catalog() {
   const { i18n, t } = useTranslation();
@@ -130,8 +131,35 @@ export default function Catalog() {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+  };
+
+  // New function to handle add product button click
+  const handleAddProduct = async () => {
     try {
       setError(null);
+      
+      // Validate inputs
+      if (!formData.boxBarcode || formData.boxBarcode.trim() === '') {
+        setError('Box barcode cannot be blank');
+        return;
+      }
+      
+      if (!formData.productName || formData.productName.trim() === '') {
+        setError('Product name cannot be blank');
+        return;
+      }
+      
+      // Check for duplicate product name
+      const existingProduct = products.find(p => 
+        p.productName.toLowerCase() === formData.productName.toLowerCase()
+      );
+      
+      if (existingProduct) {
+        setError('A product with this name already exists');
+        return;
+      }
+      
       console.log('Submitting form data:', formData); // Debug log
       await productApi.createProduct(formData);
       // Clear form
@@ -252,13 +280,14 @@ export default function Catalog() {
               </div>
             </div>
             <div>
-              <button
-                type="submit"
+              <Button
+                type="button"
+                onClick={handleAddProduct}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                 disabled={loading}
               >
                 {loading ? t('adding') : t('addProduct')}
-              </button>
+              </Button>
             </div>
           </div>
         </form>
