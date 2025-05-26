@@ -393,11 +393,11 @@ public class StockService {
                 throw new InvalidInputException("Product barcode " + productBarcode + " is not in stock. It may have been already removed, sold, lent, or marked as broken.");
             }
             
-            // Get the box number for this product barcode
+            // Get the box number from in_stock table
             Integer boxNumber = null;
-            Optional<BoxNumber> boxNumberRecord = boxNumberRepository.findByProductBarcode(productBarcode);
-            if (boxNumberRecord.isPresent()) {
-                boxNumber = boxNumberRecord.get().getBoxNumber();
+            Optional<InStock> inStockRecord = inStockRepository.findByProductBarcode(productBarcode);
+            if (inStockRecord.isPresent()) {
+                boxNumber = inStockRecord.get().getBoxNumber();
             }
             
             // Find or create stock entry
@@ -1265,12 +1265,15 @@ public class StockService {
                 if (processed.contains(barcode)) continue;
                 String pairBarcode = null;
                 try {
-                    long number = extractNumber(barcode);
+                    String numberStr = extractNumber(barcode);
+                    long number = Long.parseLong(numberStr);  // Parse only for odd/even check
                     String prefix = barcode.replaceAll("\\d+$", "");
                     if (number % 2 == 0) {
-                        pairBarcode = prefix + (number - 1);
+                        String newNumber = String.format("%0" + numberStr.length() + "d", number - 1);
+                        pairBarcode = prefix + newNumber;
                     } else {
-                        pairBarcode = prefix + (number + 1);
+                        String newNumber = String.format("%0" + numberStr.length() + "d", number + 1);
+                        pairBarcode = prefix + newNumber;
                     }
                 } catch (Exception e) {
                     // Fallback: use generatePairedBarcode
@@ -1475,10 +1478,10 @@ public class StockService {
     /**
      * Extract a number from a barcode string
      * @param barcode The barcode to extract a number from
-     * @return The extracted number
+     * @return The extracted number as a string to preserve leading zeros
      * @throws NumberFormatException if no number can be extracted
      */
-    private long extractNumber(String barcode) {
+    private String extractNumber(String barcode) {
         if (barcode == null || barcode.isEmpty()) {
             throw new NumberFormatException("Barcode is null or empty");
         }
@@ -1486,7 +1489,7 @@ public class StockService {
         // Extract the last sequence of digits from the barcode
         String numberPart = barcode.replaceAll(".*?(\\d+)(?:-PAIR)?$", "$1");
         if (numberPart.matches("\\d+")) {
-            return Long.parseLong(numberPart);
+            return numberPart;  // Return as string to preserve leading zeros
         }
         
         // No number found
@@ -1500,15 +1503,19 @@ public class StockService {
     public String generatePairedBarcode(String barcode) {
         try {
             // Extract the numeric suffix
-            long number = extractNumber(barcode);
+            String numberStr = extractNumber(barcode);
+            long number = Long.parseLong(numberStr);  // Parse only for odd/even check
             String prefix = barcode.replaceAll("\\d+(?:-PAIR)?$", "");
             
             // If the number is odd, increment it to get the next even number
             if (number % 2 != 0) {
-                return prefix + (number + 1);
+                // Format the new number with the same number of digits as the original
+                String newNumber = String.format("%0" + numberStr.length() + "d", number + 1);
+                return prefix + newNumber;
             } else {
                 // If the number is even, decrement it to get the previous odd number
-                return prefix + (number - 1);
+                String newNumber = String.format("%0" + numberStr.length() + "d", number - 1);
+                return prefix + newNumber;
             }
         } catch (NumberFormatException e) {
             logger.error("Failed to generate paired barcode for {}: {}", barcode, e.getMessage());
@@ -1548,22 +1555,15 @@ public class StockService {
                     throw new InvalidInputException("Product barcode cannot be null or empty");
                 }
                 
-                // Verify the barcode exists in the system
-                List<Logs> logs = logsService.getLogsByProductBarcode(barcode);
-                if (logs.isEmpty()) {
-                    throw new ResourceNotFoundException("Product barcode not found: " + barcode);
-                }
-                
-                // Verify the barcode belongs to this product
-                boolean belongsToProduct = logs.stream()
-                        .anyMatch(log -> request.getBoxBarcode().equals(log.getBoxBarcode()));
-                if (!belongsToProduct) {
-                    throw new InvalidInputException("Product barcode " + barcode + " does not belong to box barcode " + request.getBoxBarcode());
-                }
-                
-                // Check if the product barcode is still in stock using InStockService
+                // Check if the product barcode is in stock using InStockService
                 if (!inStockService.isInStock(barcode)) {
                     throw new InvalidInputException("Product barcode " + barcode + " is not in stock. It may have been already removed, sold, lent, or marked as broken.");
+                }
+                
+                // Verify the barcode belongs to this product by checking in_stock table
+                Optional<InStock> inStockRecord = inStockRepository.findByProductBarcode(barcode);
+                if (inStockRecord.isEmpty() || !request.getBoxBarcode().equals(inStockRecord.get().getBoxBarcode())) {
+                    throw new InvalidInputException("Product barcode " + barcode + " does not belong to box barcode " + request.getBoxBarcode());
                 }
             }
             
@@ -1928,9 +1928,11 @@ public class StockService {
         }
         
         try {
-            long number = extractNumber(lastBarcode);
-            String prefix = lastBarcode.substring(0, lastBarcode.length() - String.valueOf(number).length());
-            return String.format("%s%d", prefix, number + 1);
+            String numberStr = extractNumber(lastBarcode);
+            long number = Long.parseLong(numberStr);  // Parse only for increment
+            String prefix = lastBarcode.substring(0, lastBarcode.length() - numberStr.length());
+            String newNumber = String.format("%0" + numberStr.length() + "d", number + 1);
+            return prefix + newNumber;
         } catch (Exception e) {
             logger.error("Failed to generate auto-filled barcode: {}", e.getMessage());
             return null;

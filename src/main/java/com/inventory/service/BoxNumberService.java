@@ -151,8 +151,10 @@ public class BoxNumberService {
     private boolean arePotentialPairs(String barcode1, String barcode2) {
         try {
             // Try to extract numbers from the barcodes
-            int num1 = extractNumberFromBarcode(barcode1);
-            int num2 = extractNumberFromBarcode(barcode2);
+            String num1Str = extractNumberFromBarcode(barcode1);
+            String num2Str = extractNumberFromBarcode(barcode2);
+            int num1 = Integer.parseInt(num1Str);
+            int num2 = Integer.parseInt(num2Str);
             
             // Check if they follow the pairing rule:
             // odd pairs with odd+1, even pairs with even-1
@@ -197,17 +199,17 @@ public class BoxNumberService {
     /**
      * Extract a number from a barcode
      */
-    private int extractNumberFromBarcode(String barcode) {
+    private String extractNumberFromBarcode(String barcode) {
         // If the barcode ends with a number, extract it
         if (barcode.matches(".*\\d+$")) {
             String numberPart = barcode.replaceAll("^.*?(?=(\\d+)$)", "");
-            return Integer.parseInt(numberPart);
+            return numberPart;  // Return as string to preserve leading zeros
         } else if (barcode.matches(".*\\d+.*")) {
             // If there are numbers in the middle, extract the last one
             String[] parts = barcode.split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
             for (int i = parts.length - 1; i >= 0; i--) {
                 if (parts[i].matches("\\d+")) {
-                    return Integer.parseInt(parts[i]);
+                    return parts[i];  // Return as string to preserve leading zeros
                 }
             }
         }
