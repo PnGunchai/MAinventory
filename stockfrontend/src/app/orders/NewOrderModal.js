@@ -237,12 +237,12 @@ export default function NewOrderModal({ isOpen, onClose }) {
       .map((group, groupIndex) => {
         const groupErrors = [];
         
-        if (group.boxBarcode?.trim() && !/^[A-Za-z0-9-]+$/.test(group.boxBarcode)) {
+        if (group.boxBarcode?.trim() && !/^[A-Za-z0-9.-]+$/.test(group.boxBarcode)) {
           groupErrors.push(`Serial group ${groupIndex + 1}: Box barcode can only contain letters, numbers, and hyphens`);
         }
         
         group.items.forEach((item, itemIndex) => {
-          if (item.productBarcode?.trim() && !/^[A-Za-z0-9-]+$/.test(item.productBarcode)) {
+          if (item.productBarcode?.trim() && !/^[A-Za-z0-9.-]+$/.test(item.productBarcode)) {
             groupErrors.push(`Serial group ${groupIndex + 1}, item ${itemIndex + 1}: Product barcode can only contain letters, numbers, and hyphens`);
           }
         });

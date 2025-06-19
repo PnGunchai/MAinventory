@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 import { checkPermission } from '@/utils/permissions';
 
-const API_URL = `${process.env.NEXT_PUBLIC_API_URL || 'mainventory-production.up.railway.app/api'}/auth`;
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL || 'http://mainventory-production.up.railway.app/api'}/auth`;
 
 // Helper function to get user from cookie
 const getUserFromCookie = () => {
@@ -38,6 +38,11 @@ export const useAuthStore = create((set, get) => ({
       console.log('Login response:', response.data);
       const { token, user } = response.data;
       
+      // Validate response data before setting cookies
+      if (!token || !user) {
+        throw new Error('Invalid login response: missing token or user data');
+      }
+
       // Store token and user data in cookies
       Cookies.set('token', token, { expires: 7 });
       Cookies.set('user', JSON.stringify(user), { expires: 7 });
@@ -49,6 +54,9 @@ export const useAuthStore = create((set, get) => ({
         data: error.response?.data,
         message: error.message
       });
+      // Clear any existing cookies on error
+      Cookies.remove('token');
+      Cookies.remove('user');
       throw error;
     }
   },
